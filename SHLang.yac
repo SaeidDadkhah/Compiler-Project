@@ -1,0 +1,425 @@
+%{
+  import java.io.*;
+%}
+
+%token PROGRAM_KW MAIN_KW PROCEDURE_KW EMPTY_KW INTEGER_KW REAL_KW CHAR_KW BOOLEAN_KW IF_KW THEN_KW ELSE_KW DO_KW WHILE_KW FOR_KW IN_KW REPEAT_KW SWITCH_KW CASE_KW DEFAULT_KW END_KW RETURN_KW EXIT_KW WHEN_KW AND_KW OR_KW NOT_KW SEMICOLON_KW COLON_KW COMMA_KW SINGLE_QUOTE_KW ASS_KW LP_KW RP_KW LB_KW RB_KW LCB_KW RCB_KW TWO_DOTS_KW DOT_KW EQ_KW NE_KW LE_KW LT_KW GE_KW GT_KW ADD_KW SUB_KW MUL_KW DIV_KW MOD_KW BOOLEAN_CONSTANT CHAR_CONSTANT REAL_CONSTANT INTEGER_CONSTANT IDENTIFIER
+
+%%
+program:
+	PROGRAM_KW IDENTIFIER declarations_list procedure_list MAIN_KW block{
+		System.out.println("Rule 1: " +
+			"program: PROGRAM_KW IDENTIFIER declarations_list procedure_list MAIN_KW block" +
+			"\n");
+	}
+
+declarations_list:
+	declarations{
+		System.out.println("Rule 2.1: " +
+			"declarations_list: declarations" +
+			"\n");
+	}
+	| declarations_list declarations{
+		System.out.println("Rule 2.2: " +
+			"declarations_list: declarations" +
+			"\n");
+	}
+
+declarations:
+	type_specifiers declarator_list SEMICOLON_KW{
+		System.out.println("Rule 3.1: " +
+			"declarations: type_specifiers declarator_list SEMICOLON_KW" +
+			"\n");
+	}
+	| EMPTY_KW{
+		System.out.println("Rule 3.2: " +
+			"declarations: EMPTY_KW" +
+			"\n");
+	}
+
+type_specifiers:
+	INTEGER_KW{
+		System.out.println("Rule 4.1: " +
+			"type_specifiers: INTEGER_KW" +
+			"\n");
+	}
+	| REAL_KW{
+		System.out.println("Rule 4.2: " +
+			"type_specifiers: REAL_KW" +
+			"\n");
+	}
+	| CHAR_KW{
+		System.out.println("Rule 4.3: " +
+			"type_specifiers: CHAR_KW" +
+			"\n");
+	}
+	| BOOLEAN_KW{
+		System.out.println("Rule 4.4: " +
+			"type_specifiers: BOOLEAN_KW" +
+			"\n");
+	}
+
+delarator_list:
+	declarator{
+		System.out.println("Rule 5.1: " +
+			"delarator_list: declarator" +
+			"\n");
+	}
+	| declarator_list COMMA_KW declarator{
+		System.out.println("Rule 5.2: " +
+			"delarator_list: declarator_list COMMA_KW declarator" +
+			"\n");
+	}
+
+declarator:
+	dec{
+		System.out.println("Rule 6.1: " +
+			"declarator: dec" +
+			"\n");
+	}
+	| dec ASS_KW initializer{
+		System.out.println("Rule 6.2: " +
+			"declarator: dec ASS_KW initializer" +
+			"\n");
+	}
+
+dec:
+	IDENTIFIER{
+		System.out.println("Rule : 7.1" +
+			"dec: IDENTIFIER" +
+			"\n");
+	}
+	| IDENTIFIER LB_KW range RB_KW{
+		System.out.println("Rule 7.2: " +
+			"dec: IDENTIFIER LB_KW range RB_KW" +
+			"\n");
+	}
+	| IDENTIFIER LB_KW INTEGER_CONSTANT RB_KW{
+		System.out.println("Rule 7.3: " +
+			"dec: IDENTIFIER LB_KW INTEGER_CONSTANT RB_KW" +
+			"\n");
+	}
+
+range:
+	IDENTIFIER TWO_DOTS IDENTIFIER{
+		System.out.println("Rule 8.1: " +
+			"range: IDENTIFIER TWO_DOTS_KW IDENTIFIER" +
+			"\n");
+	}
+	| INTEGER_CONSTANT TWO_DOTS_KW INTEGER_CONSTANT{
+		System.out.println("Rule 8.2: " +
+			"range: INTEGER_CONSTANT TWO_DOTS_KW INTEGER_CONSTANT" +
+			"\n");
+	}
+	| arithmatic_expressions TWO_DOTS_KW arithmatic_expressions{
+		System.out.println("Rule 8.3: " +
+			"range: arithmatic_expressions TWO_DOTS_KW arithmatic_expressions" +
+			"\n");
+	}
+	
+initializer:
+	initializer_list{
+		System.out.println("Rule : 9.1" +
+			"initializer: initializer_list" +
+			"\n");
+	}
+	| LCB_KW initializer_list RCB_KW{
+		System.out.println("Rule 9.2: " +
+			"initializer: LCB_KW initializer_list RCB_KW" +
+			"\n");
+	}
+	
+initializer_list:
+	constant_expressions COMMA_KW initializer_list{
+		System.out.println("Rule : 10.1" +
+			"initializer_list: constant_expressions COMMA_KW initializer_list" +
+			"\n");
+	}
+	| constant_expressions{
+		System.out.println("Rule 10.2: " +
+			"initializer_list: constant_expressions" +
+			"\n");
+	}
+	
+procedure_list:
+	procedure_list procedure {
+		System.out.println("Rule : 11.1" +
+			"procedure_list: procedure_list procedure" +
+			"\n");
+	}
+	| EMPTY_KW{
+		System.out.println("Rule 11.2: " +
+			"procedure_list: EMPTY_KW" + 
+			"\n");
+	}
+	
+procedure:
+	PROCEDURE_KW IDENTIFIER parameters LCB_KW declarations_list block RCB_KW {
+		System.out.println("Rule : 12" +
+			"procedure: PROCEDURE_KW IDENTIFIER parameters LCB_KW declarations_list block RCB_KW" +
+			"\n");
+	}
+	
+parameters:
+	LP_KW declarations_list RP_KW {
+		System.out.println("Rule : 13" +
+			"parameters: LP_KW declarations_list RP_KW" +
+			"\n");
+	}
+
+block:
+	LCB_KW statement_list RCB_KW {
+		System.out.println("Rule : 14" +
+			"block: LCB_KW statement_list RCB_KW " +
+			"\n");
+	}
+	
+statement_list:
+	statement SEMICOLON_KW	{
+		System.out.println("Rule : 15.1" +
+			"statement_list: statement SEMICOLON_KW" +
+			"\n");
+	}
+	| statement_list statement	{
+		System.out.println("Rule : 15.2" +
+			"statement_list: statement_list statement" +
+			"\n");
+	}
+
+statement:
+	IDENTIFIER ASS_KW expressions {
+		System.out.println("Rule : 16.1" +
+			"statement: IDENTIFIER ASS_KW expressions" +
+			"\n");
+	}
+	| IF_KW bool_expressions THEN_KW statement {
+		System.out.println("Rule : 16.2" +
+			"statement: IF_KW bool_expressions THEN_KW statement" +
+			"\n");
+	}
+	| IF_KW bool_expressions THEN_KW statement ELSE_KW statement{
+		System.out.println("Rule : 16.3" +
+			"statement: IF_KW bool_expressions THEN_KW statement ELSE_KW statement" +
+			"\n");
+	}
+	| DO_KW statement WHILE_KW bool_expressions {
+		System.out.println("Rule : 16.4" +
+			"statement: DO_KW statement WHILE_KW bool_expressions" +
+			"\n");
+	}
+	| FOR_KW IDENTIFIER IN_KW range REPEAT_KW statement {
+		System.out.println("Rule : 16.5" +
+			"statement: FOR_KW IDENTIFIER IN_KW range REPEAT_KW statement" +
+			"\n");
+	}
+	| SWITCH_KW expressions caseelement default END_KW {
+		System.out.println("Rule : 16.6" +
+			"statement: SWITCH_KW expressions caseelement default END_KW" +
+			"\n");
+	}
+	| IDENTIFIER LP_KW arguments RP_KW {
+		System.out.println("Rule : 16.7" +
+			"statement: IDENTIFIER LP_KW arguments RP_KW" +
+			"\n");
+	}
+	| RETURN_KW expressions {
+		System.out.println("Rule : 16.8" +
+			"statement: RETURN_KW expressions" +
+			"\n");
+	}
+	| EXIT_KW WHEN_KW LP_KW bool_expressions RP_KW {
+		System.out.println("Rule : 16.9" +
+			"statement: EXIT_KW WHEN_KW LP_KW bool_expressions RP_KW" +
+			"\n");
+	}
+	| block {
+		System.out.println("Rule : 16.10" +
+			"statement: block" +
+			"\n");
+	}
+	| EMPTY_KW {
+		System.out.println("Rule : 16.11" +
+			"statement: EMPTY_KW" +
+			"\n");
+	}
+	
+arguments:
+	declarator_list {
+		System.out.println("Rule : 17.1" +
+			"arguments: declarator_list" +
+			"\n");
+	}
+	| EMPTY_KW {
+		System.out.println("Rule : 17.2" +
+			"arguments: EMPTY_KW" +
+			"\n");
+	}
+	
+caseelement:
+	CASE_KW INTEGER_CONSTANT COLON_KW block SEMICOLON_KW{
+		System.out.println("Rule : 18.1" +
+			"caseelement: CASE_KW INTEGER_CONSTANT COLON_KW block SEMICOLON_KW" +
+			"\n");
+	}
+	| caseelement CASE_KW INTEGER_CONSTANT COLON_KW block SEMICOLON_KW {
+		System.out.println("Rule : 18.2" +
+			"caseelement: caseelement CASE_KW INTEGER_CONSTANT COLON_KW block SEMICOLON_KW" +
+			"\n");
+	}
+	
+default:
+	DEFAULT_KW COLON_KW block SEMICOLON_KW {
+		System.out.println("Rule : 19.1" +
+			"default: DEFAULT_KW COLON_KW block SEMICOLON_KW" +
+			"\n");
+	}
+	| EMPTY_KW {
+		System.out.println("Rule : 19.2" +
+			"default: EMPTY_KW" +
+			"\n");
+	}	
+	
+expressions:
+	constant_expressions {
+		System.out.println("Rule : 20.1" +
+			"expressions: constant_expressions" +
+			"\n");
+	}
+	| bool_expressions {
+		System.out.println("Rule : 20.2" +
+			"expressions: bool_expressions" +
+			"\n");
+	}
+	| arithmatic_expressions{
+		System.out.println("Rule : 20.3" +
+			"expressions: arithmatic_expressions" +
+			"\n");
+	}
+	| IDENTIFIER {
+		System.out.println("Rule : 20.4" +
+			"expressions: IDENTIFIER" +
+			"\n");
+	}
+	| LP_KW expressions RP_KW {
+		System.out.println("Rule : 20.5" +
+			"expressions: LP_KW expressions RP_KW" +
+			"\n");
+	}
+	
+constant_expressions:
+	INTEGER_CONSTANT {
+		System.out.println("Rule : 21.1" +
+			"constant_expressions: INTEGER_CONSTANT" +
+			"\n");
+	}
+	| REAL_CONSTANT {
+		System.out.println("Rule : 21.2" +
+			"constant_expressions: REAL_CONSTANT" +
+			"\n");
+	}
+	| CHAR_CONSTANT {
+		System.out.println("Rule : 21.3" +
+			"constant_expressions: CHAR_CONSTANT" +
+			"\n");
+	}
+	| BOOLEAN_CONSTANT {
+		System.out.println("Rule : 21.4" +
+			"constant_expressions: BOOLEAN_CONSTANT" +
+			"\n");
+	}	
+	
+bool_expressions:
+	expressions LT_KW expressions {
+		System.out.println("Rule : 22.1" +
+			"bool_expressions: expressions LT_KW expressions" +
+			"\n");
+	}
+	| expressions LE_KW expressions {
+		System.out.println("Rule : 22.2" +
+			"bool_expressions: expressions LE_KW expressions" +
+			"\n");
+	}
+	| expressions GT_KW expressions {
+		System.out.println("Rule : 22.3" +
+			"bool_expressions: expressions GT_KW expressions" +
+			"\n");
+	}
+	| expressions GE_KW expressions {
+		System.out.println("Rule : 22.4" +
+			"bool_expressions: expressions GE_KW expressions" +
+			"\n");
+	}
+	| expressions EQ_KW expressions {
+		System.out.println("Rule : 22.5" +
+			"bool_expressions: expressions EQ_KW expressions" +
+			"\n");
+	}
+	| expressions NE_KW expressions {
+		System.out.println("Rule : 22.6" +
+			"bool_expressions: expressions NE_KW expressions" +
+			"\n");
+	}
+	| expressions AND_KW expressions {
+		System.out.println("Rule : 22.7" +
+			"bool_expressions: expressions AND_KW expressions" +
+			"\n");
+	}
+	| expressions OR_KW expressions {
+		System.out.println("Rule : 22.8" +
+			"bool_expressions: expressions OR_KW expressions" +
+			"\n");
+	}
+	| expressions AND_KW THEN_KW expressions {
+		System.out.println("Rule : 22.9" +
+			"bool_expressions: expressions AND_KW THEN_KW expressions" +
+			"\n");
+	}
+	| expressions OR_KW ELSE_KW expressions {
+		System.out.println("Rule : 22.10" +
+			"bool_expressions: expressions OR_KW ELSE_KW expressions" +
+			"\n");
+	}
+	| expressions NOT_KW expressions {
+		System.out.println("Rule : 22.11" +
+			"bool_expressions: expressions NOT_KW expressions" +
+			"\n");
+	}
+	
+arithmatic_expressions:
+	expressions ADD_KW expressions {
+		System.out.println("Rule : 23.1" +
+			"arithmatic_expressions: expressions ADD_KW expressions" +
+			"\n");
+	}
+	| expressions SUB_KW expressions {
+		System.out.println("Rule : 23.2" +
+			"arithmatic_expressions: expressions SUB_KW expressions" +
+			"\n");
+	}
+	| expressions MUL_KW expressions {
+		System.out.println("Rule : 23.3" +
+			"arithmatic_expressions: expressions MUL_KW expressions" +
+			"\n");
+	}
+	| expressions DIV_KW expressions {
+		System.out.println("Rule : 23.4" +
+			"arithmatic_expressions: expressions DIV_KW expressions" +
+			"\n");
+	}
+	| expressions MOD_KW expressions {
+		System.out.println("Rule : 23.5" +
+			"arithmatic_expressions: expressions MOD_KW expressions" +
+			"\n");
+	}
+	| SUB_KW expressions {
+		System.out.println("Rule : 23.6" +
+			"arithmatic_expressions: SUB_KW expressions" +
+			"\n");
+	}
+	
+	
+	
+{
+		System.out.println("Rule : " +
+			"" +
+			"\n");
+	}
