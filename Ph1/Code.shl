@@ -1,0 +1,37 @@
+program folan
+	real r123qwe := 3.5,
+	int aaa,
+	int b[2..81],
+	char ch='A',
+	boolean bbb123bbb := true,
+	boolean b1a := false,
+	procedure p(int c, int d[2..8]){
+		real r := 0.6;
+		{
+			r := r - c;
+			switch r{
+				case 2: d[5] := 4;
+				case 3: d[5] := 6;
+				case 4: d[5] := 7;
+				default: d[5] := 2;
+			}
+		}
+	}
+	main {
+		a:=3*2-4/2;
+		if a<=6 and 2<=a then
+			a := 5;
+		else
+			a:=10;
+		for a in 2..10 repeat
+			a:=a+1;
+		p(10, b);
+		
+		aaa := 2;
+		do
+			b[aaa] := aaa;
+			aaa := aaa + 1;
+		while 2<aaa and aaa<=81;
+		
+		exit when b[56] <> 58;
+	}

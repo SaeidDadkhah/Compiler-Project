@@ -24,7 +24,7 @@ class MainClass {
         }
     }
 } */
-
+  
 %%
 
 %byaccj
@@ -236,7 +236,8 @@ IDENTIFIER ={LETTER}({LETTER}|{DIGIT})*
 	return YYParser.COMMA_KW;
 }
 {SINGLE_QUOTE_KW} {
-	System.out.println(yytext() + "\t" + "SINGLE_QUOTE_KW\t" + '-');
+	// System.out.println(yytext() + "\t" + "SINGLE_QUOTE_KW\t" + '-');
+	return YYParser.SINGLE_QUOTE_KW;
 }
 {ASS_KW} {
 	// System.out.println(yytext() + "\t" + "ASS_KW\t" + '-');
@@ -273,7 +274,8 @@ IDENTIFIER ={LETTER}({LETTER}|{DIGIT})*
 	return YYParser.TWO_DOTS_KW;
 }
 {DOT_KW} {
-    System.out.println(yytext() + "\t" + "DOT_KW\t" + '-');
+    // System.out.println(yytext() + "\t" + "DOT_KW\t" + '-');
+	return YYParser.DOT_KW;
 }
 
 {EQ_KW} {
@@ -324,27 +326,22 @@ IDENTIFIER ={LETTER}({LETTER}|{DIGIT})*
 
 {BOOLEAN_CONSTANT} {
 	// System.out.println(yytext() + "\t" + "CHAR_CONSTANT\t" + "-");
-	YYParser.lexBoolean = Boolean.parseBoolean(yytext());
 	return YYParser.BOOLEAN_CONSTANT;
 }
 {CHAR_CONSTANT} {
 	// System.out.println(yytext() + "\t" + "CHAR_CONSTANT\t" + "-");
-	YYParser.lexChar = yytext().charAt(1);
 	return YYParser.CHAR_CONSTANT;
 }
 {REAL_CONSTANT} {
 	// System.out.println(yytext() + "\t" + "REAL_CONSTANT\t" + "-");
-	YYParser.lexReal = Double.parseDouble(yytext());
 	return YYParser.REAL_CONSTANT;
 }
 {INTEGER_CONSTANT} {
 	// System.out.println(yytext() + "\t" + "INTEGER_CONSTANT\t" + "-");
-	YYParser.lexInt = Integer.parseInt(yytext());
 	return YYParser.INTEGER_CONSTANT;
 }
 {IDENTIFIER} {
 	// System.out.println(yytext() + "\t" + "IDENTIFIER\t" + "Symbol Table Entry");
-	YYParser.lexIdentifier = yytext();
 	return YYParser.IDENTIFIER;
 }
 

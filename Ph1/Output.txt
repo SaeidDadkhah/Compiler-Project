@@ -1,0 +1,195 @@
+Lexeme	Token	Attribute
+program	PROGRAM_KW	-
+folan	IDENTIFIER	Symbol Table Entry
+real	REAL_KW	-
+r123qwe	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+3.5	REAL_CONSTANT	-
+,	COMMA_KW	-
+int	INTEGER_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+,	COMMA_KW	-
+int	INTEGER_KW	-
+b	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+2	INTEGER_CONSTANT	-
+..	TWO_DOTS_KW	-
+81	INTEGER_CONSTANT	-
+]	RB_KW	-
+,	COMMA_KW	-
+char	CHAR_KW	-
+ch	IDENTIFIER	Symbol Table Entry
+=	EQ_KW	-
+'A'	CHAR_CONSTANT	-
+,	COMMA_KW	-
+boolean	BOOLEAN_KW	-
+bbb123bbb	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+true	CHAR_CONSTANT	-
+,	COMMA_KW	-
+boolean	BOOLEAN_KW	-
+b1a	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+false	CHAR_CONSTANT	-
+,	COMMA_KW	-
+procedure	PROCEDURE_KW	-
+p	IDENTIFIER	Symbol Table Entry
+(	LP_KW	-
+int	INTEGER_KW	-
+c	IDENTIFIER	Symbol Table Entry
+,	COMMA_KW	-
+int	INTEGER_KW	-
+d	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+2	INTEGER_CONSTANT	-
+..	TWO_DOTS_KW	-
+8	INTEGER_CONSTANT	-
+]	RB_KW	-
+)	RP_KW	-
+{	LCB_KW	-
+real	REAL_KW	-
+r	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+0.6	REAL_CONSTANT	-
+;	SEMICOLON_KW	-
+{	LCB_KW	-
+r	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+r	IDENTIFIER	Symbol Table Entry
+-	SUB_KW	-
+c	IDENTIFIER	Symbol Table Entry
+;	SEMICOLON_KW	-
+switch	SWITCH_KW	-
+r	IDENTIFIER	Symbol Table Entry
+{	LCB_KW	-
+case	CASE_KW	-
+2	INTEGER_CONSTANT	-
+:	COLON_KW	-
+d	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+5	INTEGER_CONSTANT	-
+]	RB_KW	-
+:=	ASS_KW	-
+4	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+case	CASE_KW	-
+3	INTEGER_CONSTANT	-
+:	COLON_KW	-
+d	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+5	INTEGER_CONSTANT	-
+]	RB_KW	-
+:=	ASS_KW	-
+6	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+case	CASE_KW	-
+4	INTEGER_CONSTANT	-
+:	COLON_KW	-
+d	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+5	INTEGER_CONSTANT	-
+]	RB_KW	-
+:=	ASS_KW	-
+7	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+default	DEFAULT_KW	-
+:	COLON_KW	-
+d	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+5	INTEGER_CONSTANT	-
+]	RB_KW	-
+:=	ASS_KW	-
+2	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+}	RCB_KW	-
+}	RCB_KW	-
+}	RCB_KW	-
+main	MAIN_KW	-
+{	LCB_KW	-
+a	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+3	INTEGER_CONSTANT	-
+*	MUL_KW	-
+2	INTEGER_CONSTANT	-
+-	SUB_KW	-
+4	INTEGER_CONSTANT	-
+/	DIV_KW	-
+2	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+if	IF_KW	-
+a	IDENTIFIER	Symbol Table Entry
+<=	LE_KW	-
+6	INTEGER_CONSTANT	-
+and	AND_KW	-
+2	INTEGER_CONSTANT	-
+<=	LE_KW	-
+a	IDENTIFIER	Symbol Table Entry
+then	THEN_KW	-
+a	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+5	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+else	ELSE_KW	-
+a	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+10	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+for	FOR_KW	-
+a	IDENTIFIER	Symbol Table Entry
+in	IN_KW	-
+2	INTEGER_CONSTANT	-
+..	TWO_DOTS_KW	-
+10	INTEGER_CONSTANT	-
+repeat	REPEAT_KW	-
+a	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+a	IDENTIFIER	Symbol Table Entry
++	ADD_KW	-
+1	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+p	IDENTIFIER	Symbol Table Entry
+(	LP_KW	-
+10	INTEGER_CONSTANT	-
+,	COMMA_KW	-
+b	IDENTIFIER	Symbol Table Entry
+)	RP_KW	-
+;	SEMICOLON_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+2	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+do	DO_KW	-
+b	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+]	RB_KW	-
+:=	ASS_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+;	SEMICOLON_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+:=	ASS_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
++	ADD_KW	-
+1	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+while	WHILE_KW	-
+2	INTEGER_CONSTANT	-
+<	LT_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+and	AND_KW	-
+aaa	IDENTIFIER	Symbol Table Entry
+<=	LE_KW	-
+81	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+exit	EXIT_KW	-
+when	WHEN_KW	-
+b	IDENTIFIER	Symbol Table Entry
+[	LB_KW	-
+56	INTEGER_CONSTANT	-
+]	RB_KW	-
+<>	NE_KW	-
+58	INTEGER_CONSTANT	-
+;	SEMICOLON_KW	-
+}	RCB_KW	-
+
+Process finished with exit code 0

@@ -1,6 +1,5 @@
 program folan
-	real r123qwe1 := {3.5};
-	real r123qwe2 := 3.5, 4.5;
+	real r123qwe := {3.5};
 	int aaa;
 	int b[2..81];
 	char c:={'A'};
