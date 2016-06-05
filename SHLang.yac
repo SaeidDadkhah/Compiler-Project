@@ -18,7 +18,7 @@
 %token <EVal> BOOLEAN_CONSTANT
 %type <EVal> saved_boolean
 
-%type <EVal> type_specifiers declarator_list declarator declarator_end dec initializer initializer_end initializer_list initializer_list_in_cb range other_statement expressions constant_expressions bool_expressions arithmatic_expressions
+%type <EVal> type_specifiers declarator_list declarator declarator_end dec initializer initializer_end initializer_list initializer_list_in_cb range statement_list statement matched unmatched other_statement expressions constant_expressions bool_expressions arithmatic_expressions
 %type <EVal> M
 
 %code {
@@ -145,12 +145,18 @@
 				else
 					dos.writeBytes(Quadruple.LINE_STR + i + ":" + "\t" + quadruples.get(i) + "\n");
 			}
-			dos.writeBytes("\t\t\t\tgetchar();\n\t\t\t\treturn 0;\n");
+			// Normal Finish
 			if(quadruples.size() < 100)
-				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\t\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
+				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\t\tgetchar();\n\t\t\t\treturn 0;\n");
+			else
+				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\tgetchar();\n\t\t\t\treturn 0;\n");
+
+			// Array index out of bound error.
+			if(quadruples.size() < 100)
+				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 1) + ":" + "\t\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
 					"\t\t\t\tgetchar();\n\t\t\t\treturn -1;\n");
 			else
-				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
+				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 1) + ":" + "\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
 					"\t\t\t\tgetchar();\n\t\t\t\treturn -1;\n");
 			dos.writeBytes("}");
 		} catch (IOException e) {
@@ -634,17 +640,24 @@ block:
 	}
 
 statement_list:
-	SEMICOLON_KW {
+	SEMICOLON_KW M {
 		System.out.println("Rule 15.1: " +
 			"statement_list: statement SEMICOLON_KW");
+		$$ = new EVal();
+		((EVal)$$).nextList = EVal.makeList($2.quad);
 	}
-	| statement SEMICOLON_KW {
+	| statement SEMICOLON_KW M {
 		System.out.println("Rule 15.2: " +
 			"statement_list: statement SEMICOLON_KW");
+		$$ = new EVal();
+		((EVal)$$).nextList = $1.nextList;
 	}
-	| statement_list statement SEMICOLON_KW {
+	| statement_list M statement SEMICOLON_KW {
 		System.out.println("Rule 15.3: " +
 			"statement_list: statement_list statement SEMICOLON_KW");
+		$$ = new EVal();
+		((EVal)$$).nextList = $3.nextList;
+		backpatch($1.nextList, $2.quad);
 	}
 
 statement: 
@@ -720,6 +733,8 @@ other_statement:
 			emit(":=", "1", null, ((EVal)$$).place);
 			emit("bprint", null, null, $1.place);
 		}
+		((EVal)$$).nextList = EVal.makeList(nextQuad());
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| saved_identifier LB_KW expressions RB_KW ASS_KW expressions {
 		System.out.println("Rule 16.1: " +
@@ -767,10 +782,17 @@ other_statement:
 			emit("[]=", "1", indexStr + $1.place, ((EVal)$$).place);
 			emit("abprint", condStr + $1.place, indexStr + $1.place, $1.place);
 		}
+		((EVal)$$).nextList = EVal.makeList(nextQuad());
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
-	| DO_KW statement WHILE_KW bool_expressions {
+	| DO_KW M statement WHILE_KW M bool_expressions {
 		System.out.println("Rule 16.4: " +
 			"other_statement: DO_KW statement WHILE_KW bool_expressions");
+		$$ = new EVal();
+		((EVal)$$).nextList = $6.falseList;
+
+		backpatch($3.nextList, $5.quad);
+		backpatch($6.trueList, $2.quad);
 	}
 	| FOR_KW saved_identifier IN_KW range REPEAT_KW block {
 		System.out.println("Rule 16.5: " +
@@ -968,7 +990,7 @@ bool_expressions:
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
 
-		emit("<", $1.place, $2.place, ((EVal)$$).place);
+		emit("<", $1.place, $3.place, ((EVal)$$).place);
 		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
@@ -981,7 +1003,7 @@ bool_expressions:
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
 
-		emit("<=", $1.place, $2.place, ((EVal)$$).place);
+		emit("<=", $1.place, $3.place, ((EVal)$$).place);
 		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
@@ -994,7 +1016,7 @@ bool_expressions:
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
 
-		emit(">", $1.place, $2.place, ((EVal)$$).place);
+		emit(">", $1.place, $3.place, ((EVal)$$).place);
 		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
@@ -1007,7 +1029,7 @@ bool_expressions:
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
 
-		emit(">=", $1.place, $2.place, ((EVal)$$).place);
+		emit(">=", $1.place, $3.place, ((EVal)$$).place);
 		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
@@ -1020,7 +1042,7 @@ bool_expressions:
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
 
-		emit("=", $1.place, $2.place, ((EVal)$$).place);
+		emit("=", $1.place, $3.place, ((EVal)$$).place);
 		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
@@ -1033,7 +1055,7 @@ bool_expressions:
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
 
-		emit("<>", $1.place, $2.place, ((EVal)$$).place);
+		emit("<>", $1.place, $3.place, ((EVal)$$).place);
 		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}

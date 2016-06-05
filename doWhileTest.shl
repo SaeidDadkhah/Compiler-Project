@@ -1,0 +1,8 @@
+program doWhileTest
+	int d;
+	main {
+		d := 1;
+		do
+			d := d * 2
+		while d < 10;
+	}
