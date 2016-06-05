@@ -132,7 +132,9 @@
 			dos.writeBytes("#include <stdio.h>\n\nint main() {\n\t// ////////////////// Symbol Table \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ \\\\\n\n");
 			dos.writeBytes(symbolTable.toString());
 			dos.writeBytes("\n\t// ////////////////// Quadruples \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ \\\\\n\n");
-			backpatch(EVal.arrayIndexOutOfBoundList, quadruples.size()); // Array index out of bound error.
+			// Backpatch of error controllers.
+			backpatch(EVal.arrayIndexOutOfBoundList, (quadruples.size() + 1)); // Array index out of bound error.
+			backpatch(EVal.invalidArraySizeList, (quadruples.size() + 2)); // Invalid array size error.
 			for (int i = 0; i < quadruples.size() && i < 100; i++) {
 				if(quadruples.get(i).isDeclaration())
 					dos.writeBytes("\t\t\t\t" + quadruples.get(i) + "\n");
@@ -143,21 +145,32 @@
 				if(quadruples.get(i).isDeclaration())
 					dos.writeBytes("\t\t\t\t" + quadruples.get(i) + "\n");
 				else
-					dos.writeBytes(Quadruple.LINE_STR + i + ":" + "\t" + quadruples.get(i) + "\n");
+					dos.writeBytes(Quadruple.LINE_STR + i + ":" + "\t\t" + quadruples.get(i) + "\n");
 			}
 			// Normal Finish
 			if(quadruples.size() < 100)
-				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\t\tgetchar();\n\t\t\t\treturn 0;\n");
+				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\t\tprintf(\"Process is terminated with no error.\\n\");\n" +
+					"\t\t\t\tgetchar();\n\t\t\t\treturn 0;\n");
 			else
-				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\tgetchar();\n\t\t\t\treturn 0;\n");
+				dos.writeBytes(Quadruple.LINE_STR + quadruples.size() + ":" + "\t\tprintf(\"Process is terminated with no error.\\n\");\n" +
+					"\t\t\t\tgetchar();\n\t\t\t\treturn 0;\n");
 
 			// Array index out of bound error.
 			if(quadruples.size() < 100)
 				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 1) + ":" + "\t\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
-					"\t\t\t\tgetchar();\n\t\t\t\treturn -1;\n");
+					"\t\t\t\tgetchar();\n\t\t\treturn -1;\n");
 			else
-				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 1) + ":" + "\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
-					"\t\t\t\tgetchar();\n\t\t\t\treturn -1;\n");
+				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 1) + ":" + "\t\tprintf(\"Array Error: Index out of bound!\\n\");\n" +
+					"\t\t\t\tgetchar();\n\t\t\treturn -1;\n");
+
+			// Invalid array size error.
+			if(quadruples.size() < 100)
+				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 2) + ":" + "\t\tprintf(\"Array Error: Invalid array size!\\n\");\n" +
+					"\t\t\t\tgetchar();\n\t\t\treturn -1;\n");
+			else
+				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 2) + ":" + "\t\tprintf(\"Array Error: Invalid array size!\\n\");\n" +
+					"\t\t\t\tgetchar();\n\t\t\treturn -1;\n");
+
 			dos.writeBytes("}");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -462,12 +475,18 @@ range:
 		((EVal)$$).type = EVal.TYPE_CODE_RANGE;
 		((EVal)$$).array = true;
 
+		// Set start and size
 		symbolTable.addToSymbolTable(startStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
-		emit(":=", $1.place, null , startStr + ((EVal)$$).place);
-
 		symbolTable.addToSymbolTable(sizeStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
+		emit(":=", $1.place, null , startStr + ((EVal)$$).place);
 		emit("-", $3.place, $1.place , sizeStr + ((EVal)$$).place);
 		emit("+", sizeStr + ((EVal)$$).place, "1", sizeStr + ((EVal)$$).place);
+
+		// Check size
+		symbolTable.addToSymbolTable(condStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
+		EVal.invalidArraySizeList.add(nextQuad() + 1);
+		emit("<=", sizeStr + ((EVal)$$).place, "0", condStr + ((EVal)$$).place);
+		emit("check", condStr + ((EVal)$$).place, null, String.valueOf(nextQuad() + 1));
 	}
 	| saved_integer TWO_DOTS_KW saved_integer {
 		System.out.println("Rule 8.2: " +
@@ -477,12 +496,18 @@ range:
 		((EVal)$$).type = EVal.TYPE_CODE_RANGE;
 		((EVal)$$).array = true;
 
+		// Set start and size
 		symbolTable.addToSymbolTable(startStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
-		emit(":=", $1.place, null , startStr + ((EVal)$$).place);
-
 		symbolTable.addToSymbolTable(sizeStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
+		emit(":=", $1.place, null , startStr + ((EVal)$$).place);
 		emit("-", $3.place, $1.place , sizeStr + ((EVal)$$).place);
 		emit("+", sizeStr + ((EVal)$$).place, "1", sizeStr + ((EVal)$$).place);
+
+		// Check size
+		symbolTable.addToSymbolTable(condStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
+		EVal.invalidArraySizeList.add(nextQuad() + 1);
+		emit("<=", sizeStr + ((EVal)$$).place, "0", condStr + ((EVal)$$).place);
+		emit("check", condStr + ((EVal)$$).place, null, String.valueOf(nextQuad() + 1));
 	}
 	| arithmatic_expressions TWO_DOTS_KW arithmatic_expressions {
 		System.out.println("Rule 8.3: " +
@@ -501,12 +526,18 @@ range:
 		((EVal)$$).type = EVal.TYPE_CODE_RANGE;
 		((EVal)$$).array = true;
 
+		// Set start and size
 		symbolTable.addToSymbolTable(startStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
-		emit(":=", $1.place, null , startStr + ((EVal)$$).place);
-
 		symbolTable.addToSymbolTable(sizeStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
+		emit(":=", $1.place, null , startStr + ((EVal)$$).place);
 		emit("-", $3.place, $1.place , sizeStr + ((EVal)$$).place);
 		emit("+", sizeStr + ((EVal)$$).place, "1", sizeStr + ((EVal)$$).place);
+
+		// Check size
+		symbolTable.addToSymbolTable(condStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
+		EVal.invalidArraySizeList.add(nextQuad() + 1);
+		emit("<=", sizeStr + ((EVal)$$).place, "0", condStr + ((EVal)$$).place);
+		emit("check", condStr + ((EVal)$$).place, null, String.valueOf(nextQuad() + 1));
 	}
 	
 initializer:
@@ -744,7 +775,7 @@ other_statement:
 			System.err.println("Error! \"" + $1.place + "\" is not declared.");
 			return YYABORT;
 		}
-		if(symbolTable.types.get(index) != $3.type) {
+		if(symbolTable.types.get(index) != $6.type) {
 			System.err.println("Error! Type mismatch: " + $1.place + ", " + $3.place);
 			return YYABORT;
 		}
@@ -757,21 +788,23 @@ other_statement:
 		((EVal)$$).type = $3.type;
 		((EVal)$$).array = true;
 		EVal.arrayIndexOutOfBoundList.add(nextQuad() + 2);
+		EVal.arrayIndexOutOfBoundList.add(nextQuad() + 4);
 		emit("-", $3.place, startStr + $1.place, indexStr + $1.place);
 		emit(">=", indexStr + $1.place, sizeStr + $1.place, condStr + $1.place);
+		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 4)); // result will be backpatched.
+		emit("<", indexStr + $1.place, "0", condStr + $1.place);
 		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
 		if($6.type != EVal.TYPE_CODE_BOOLEAN) {
 			emit("[]=", $6.place, indexStr + $1.place, $1.place);
-			emit("+", indexStr + $1.place, startStr + $1.place, condStr + $1.place);
 			switch ($6.type) {
 				case EVal.TYPE_CODE_INTEGER:
-					emit("aiprint", condStr + $1.place, indexStr + $1.place, $1.place);
+					emit("aiprint", $3.place, indexStr + $1.place, $1.place);
 					break;
 				case EVal.TYPE_CODE_REAL:
-					emit("arprint", condStr + $1.place, indexStr + $1.place, $1.place);
+					emit("arprint", $3.place, indexStr + $1.place, $1.place);
 					break;
 				case EVal.TYPE_CODE_CHAR:
-					emit("acprint", condStr + $1.place, indexStr + $1.place, $1.place);
+					emit("acprint", $3.place, indexStr + $1.place, $1.place);
 					break;
 			}
 		} else {
@@ -780,8 +813,9 @@ other_statement:
 			emit("[]=", "0", indexStr + $1.place, ((EVal)$$).place);
 			emit("goto", null, null, String.valueOf(nextQuad() + 2));
 			emit("[]=", "1", indexStr + $1.place, ((EVal)$$).place);
-			emit("abprint", condStr + $1.place, indexStr + $1.place, $1.place);
+			emit("abprint", $3.place, indexStr + $1.place, $1.place);
 		}
+
 		((EVal)$$).nextList = EVal.makeList(nextQuad());
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
@@ -921,8 +955,11 @@ expressions:
 		((EVal)$$).place = newTemp(symbolTable.types.get(index), false);
 		((EVal)$$).type = symbolTable.types.get(index);
 		EVal.arrayIndexOutOfBoundList.add(nextQuad() + 2);
+		EVal.arrayIndexOutOfBoundList.add(nextQuad() + 4);
 		emit("-", $3.place, startStr + $1.place, indexStr + $1.place);
 		emit(">=", indexStr + $1.place, sizeStr + $1.place, condStr + $1.place);
+		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 3)); // Result will be backpatched.
+		emit("<", indexStr + $1.place, "0", condStr + $1.place);
 		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 1)); // Result will be backpatched.
 		if($3.type != EVal.TYPE_CODE_BOOLEAN) {
 			emit("=[]", $1.place, indexStr + $1.place, ((EVal)$$).place);
@@ -1288,6 +1325,7 @@ class EVal {
 	public int quad;
 
 	public static ArrayList<Integer> arrayIndexOutOfBoundList = new ArrayList<>();
+	public static ArrayList<Integer> invalidArraySizeList = new ArrayList<>();
 	public ArrayList<Integer> nextList;
 	public ArrayList<Integer> trueList;
 	public ArrayList<Integer> falseList;
