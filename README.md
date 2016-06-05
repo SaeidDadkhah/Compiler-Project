@@ -1,7 +1,7 @@
-# Compiler-Project
+# Compiler-Project (SHLang)
 Project of Compiler Design Course (BSc)
 
-SHLang Project:
+Contributors:
     -Saeid Dadkhah (saeid.dadkhah@live.com)
     -Hasti Sharifi (hastisharifi75@gmail.com)
 
