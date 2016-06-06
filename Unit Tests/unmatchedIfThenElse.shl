@@ -1,0 +1,12 @@
+program unmatchedIf
+	int a;
+	int b;
+	main {
+		a := 2;
+		if a = 1 then
+			b := 1
+		else
+			if a = 2 then
+				b := 2
+		;
+	}
