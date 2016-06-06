@@ -731,10 +731,18 @@ unmatched:
 	 IF_KW bool_expressions THEN_KW M matched N ELSE_KW M unmatched {
 		System.out.println("Rule 25.1: " +
 			"unmatched: IF_KW bool_expressions THEN_KW matched ELSE_KW unmatched");
+		$$ = new EVal();
+		backpatch($2.trueList, $4.quad);
+		backpatch($2.falseList, $8.quad);
+		((EVal)$$).nextList = EVal.merge($5.nextList, $6.nextList);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).nextList, $9.nextList);
 	}
 	| IF_KW bool_expressions THEN_KW M statement {
 		System.out.println("Rule 25.2: " +
 			"unmatched: IF_KW bool_expressions THEN_KW statement");
+		$$ = new EVal();
+		backpatch($2.trueList, $4.quad);
+		((EVal)$$).nextList = EVal.merge($2.falseList, $5.nextList);
 	}
 
 
