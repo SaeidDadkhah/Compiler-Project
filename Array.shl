@@ -1,4 +1,4 @@
-program booleanTest
+program array
 	int a[2] := 2, 3;
 	real b[3..4] := {7.1, 6.2};
 	char c[9..11] := {'A', 'b', '1'};

@@ -18,8 +18,8 @@
 %token <EVal> BOOLEAN_CONSTANT
 %type <EVal> saved_boolean
 
-%type <EVal> type_specifiers declarator_list declarator declarator_end dec initializer initializer_end initializer_list initializer_list_in_cb range statement_list statement matched unmatched other_statement expressions constant_expressions bool_expressions arithmatic_expressions
-%type <EVal> M
+%type <EVal> type_specifiers declarator_list declarator declarator_end dec initializer initializer_end initializer_list initializer_list_in_cb range block statement_list statement matched unmatched other_statement expressions constant_expressions bool_expressions arithmatic_expressions
+%type <EVal> M N
 
 %code {
 
@@ -188,24 +188,28 @@
 
 %%
 program:
-	PROGRAM_KW saved_identifier declarations_list procedure_list MAIN_KW block{
+	PROGRAM_KW saved_identifier declarations_list procedure_list MAIN_KW block {
 		System.out.println("Rule 1.1: " +
 			"program: PROGRAM_KW saved_identifier declarations_list procedure_list MAIN_KW block");
+		backpatch($6.nextList, nextQuad());
 		exportIntermediateCode();
 	}
-	| PROGRAM_KW saved_identifier procedure_list MAIN_KW block{
+	| PROGRAM_KW saved_identifier procedure_list MAIN_KW block {
 		System.out.println("Rule 1.2: " +
 			"program: PROGRAM_KW saved_identifier procedure_list MAIN_KW block");
+		backpatch($5.nextList, nextQuad());
 		exportIntermediateCode();
 	}
-	| PROGRAM_KW saved_identifier declarations_list MAIN_KW block{
+	| PROGRAM_KW saved_identifier declarations_list MAIN_KW block {
 		System.out.println("Rule 1.3: " +
 			"program: PROGRAM_KW saved_identifier declarations_list MAIN_KW block");
+		backpatch($5.nextList, nextQuad());
 		exportIntermediateCode();
 	}
-	| PROGRAM_KW saved_identifier MAIN_KW block{
+	| PROGRAM_KW saved_identifier MAIN_KW block {
 		System.out.println("Rule 1.4: " +
 			"program: PROGRAM_KW saved_identifier MAIN_KW block");
+		backpatch($4.nextList, nextQuad());
 		exportIntermediateCode();
 	}
 
@@ -664,10 +668,15 @@ block:
 	LCB_KW statement_list RCB_KW {
 		System.out.println("Rule 14.1: " +
 			"block: LCB_KW statement_list RCB_KW ");
+		$$ = new EVal();
+		((EVal)$$).nextList = $2.nextList;
 	}
 	| LCB_KW RCB_KW {
 		System.out.println("Rule 14.2: " +
 			"block: LCB_KW RCB_KW ");
+		$$ = new EVal();
+		((EVal)$$).nextList = EVal.makeList(nextQuad());
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched
 	}
 
 statement_list:
@@ -702,21 +711,28 @@ statement:
 	}
 	
 matched: 
-	 IF_KW bool_expressions THEN_KW matched ELSE_KW matched {
+	IF_KW bool_expressions THEN_KW M matched N ELSE_KW M matched {
 		System.out.println("Rule 24.1: " +
 			"matched: IF_KW bool_expressions THEN_KW matched ELSE_KW matched");
+		$$ = new EVal();
+		backpatch($2.trueList, $4.quad);
+		backpatch($2.falseList, $8.quad);
+		((EVal)$$).nextList = EVal.merge($5.nextList, $6.nextList);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).nextList, $9.nextList);
 	}
 	| other_statement {
 		System.out.println("Rule 24.2: " +
 			"matched: other_statement");
+		$$ = new EVal();
+		((EVal)$$).nextList = $1.nextList;
 	}
 	
 unmatched: 
-	 IF_KW bool_expressions THEN_KW matched ELSE_KW unmatched {
+	 IF_KW bool_expressions THEN_KW M matched N ELSE_KW M unmatched {
 		System.out.println("Rule 25.1: " +
 			"unmatched: IF_KW bool_expressions THEN_KW matched ELSE_KW unmatched");
 	}
-	| IF_KW bool_expressions THEN_KW statement {
+	| IF_KW bool_expressions THEN_KW M statement {
 		System.out.println("Rule 25.2: " +
 			"unmatched: IF_KW bool_expressions THEN_KW statement");
 	}
@@ -828,9 +844,37 @@ other_statement:
 		backpatch($3.nextList, $5.quad);
 		backpatch($6.trueList, $2.quad);
 	}
-	| FOR_KW saved_identifier IN_KW range REPEAT_KW block {
+	| FOR_KW saved_identifier IN_KW range N REPEAT_KW M block {
 		System.out.println("Rule 16.5: " +
-			"other_statement: FOR_KW saved_identifier IN_KW range REPEAT_KW statement");
+			"other_statement: FOR_KW saved_identifier IN_KW range N REPEAT_KW M block");
+		int index = symbolTable.lookUp($2.place);
+		if (index == SymbolTable.NOT_IN_SYMBOL_TABLE) {
+			System.err.println("Error! \"" + $1.place + "\" is not declared.");
+			return YYABORT;
+		}
+		if(symbolTable.types.get(index) != EVal.TYPE_CODE_INTEGER) {
+			System.err.println("Error! Type mismatch: " + $1.place + ", Integer");
+			return YYABORT;
+		}
+		if (symbolTable.arrays.get(index)) {
+			System.err.println("Error! \"" + lexIdentifier + "\" is an array, it can not be used in for initializer.");
+			return YYABORT;
+		}
+		
+		$$ = new EVal();
+		
+		backpatch($5.nextList, nextQuad());
+		backpatch($8.nextList, nextQuad() + 5);
+		
+		emit(":=", startStr + $4.place, null, $2.place);
+		emit("-", $2.place, startStr + $4.place, condStr + $4.place);
+		emit("<", condStr + $4.place, sizeStr + $4.place, condStr + $4.place);
+		emit("check", condStr + $4.place, null, String.valueOf($7.quad));
+		emit("goto", null, null, String.valueOf(nextQuad() + 3)); // result will be backpatched;
+		emit("+", $2.place, "1", $2.place);
+		emit("goto", null, null, String.valueOf(nextQuad() - 5));
+		
+		((EVal)$$).nextList = EVal.makeList(nextQuad() - 3);
 	}
 	| SWITCH_KW expressions caseelement default END_KW {
 		System.out.println("Rule 16.6.1: " +
@@ -1231,8 +1275,8 @@ arithmatic_expressions:
 			"arithmatic_expressions: SUB_KW expressions");
 		if($2.type == EVal.TYPE_CODE_INTEGER || $2.type == EVal.TYPE_CODE_REAL){
 			$$ = new EVal();
-			((EVal)$$).place = newTemp($1.type, false);
-			((EVal)$$).type = $1.type;
+			((EVal)$$).place = newTemp($2.type, false);
+			((EVal)$$).type = $2.type;
 			emit("usub", $2.place, null, ((EVal)$$).place);
 		}
 	}
@@ -1299,10 +1343,17 @@ saved_boolean:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 
-	M:
+M:
 	{
 		$$ = new EVal();
 		((EVal)$$).quad = nextQuad();
+	}
+
+N:
+	{
+		$$ = new EVal();
+		((EVal)$$).nextList = EVal.makeList(nextQuad());
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 
 %%
@@ -1435,7 +1486,6 @@ class Quadruple {
 			case "<=":
 			case ">":
 			case ">=":
-			case "=":
 			case "<>":
 			case "+":
 			case "-":
@@ -1443,6 +1493,8 @@ class Quadruple {
 			case "/":
 			case "%":
 				return result + " = " + arg0 + " " + operation + " " + arg1 + ";";
+			case "=":
+				return result + " = " + arg0 + " " + "==" + " " + arg1 + ";";
 			case "usub":
 				return result + " = -" + arg0 + ";";
 			case ":=":

@@ -1,4 +1,4 @@
-program booleanTest
+program boolean
 	boolean b1 := true;
 	boolean b2 := false;
 	boolean b3;
