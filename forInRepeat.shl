@@ -1,7 +1,0 @@
-program forInRepeat
-	int d;
-	int a;
-	main {
-		a := 1;
-		for d in 2 + 1 .. 2 * 3 repeat {a := a * d;};
-	}
