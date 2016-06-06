@@ -1,0 +1,13 @@
+program boolean
+	boolean b1 := true;
+	boolean b2 := false;
+	boolean b3;
+	boolean b4;
+	boolean b5;
+	boolean b6;
+	main {
+		b3 := b1 and b2;
+		b4 := b1 or b2;
+		b5 := not b1;
+		b6 := not b2;
+	}
