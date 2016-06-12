@@ -1,4 +1,4 @@
-program forInRepeat
+program forInRepeatTest
 	int d;
 	int a;
 	main {
