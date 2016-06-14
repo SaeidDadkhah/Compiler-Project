@@ -792,9 +792,24 @@ other_statement:
 			System.err.println("Error! \"" + $1.place + "\" is not declared.");
 			return YYABORT;
 		}
+		String srcPlace = $3.place;
 		if(symbolTable.types.get(index) != $3.type) {
-			System.err.println("Error! Type mismatch: " + $1.place + ", " + $3.place);
-			return YYABORT;
+			if((symbolTable.types.get(index) == EVal.TYPE_CODE_REAL)
+				&& ($3.type == EVal.TYPE_CODE_INTEGER
+					|| $3.type == EVal.TYPE_CODE_CHAR
+					|| $3.type == EVal.TYPE_CODE_BOOLEAN)) {
+				srcPlace = newTemp(EVal.TYPE_CODE_REAL, false);
+				emit("cast", $3.place, TYPE_STRING_REAL, srcPlace);
+			} else if((symbolTable.types.get(index) == EVal.TYPE_CODE_INTEGER
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_CHAR
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_BOOLEAN)
+				&& ($3.type == EVal.TYPE_CODE_REAL)) {
+				srcPlace = newTemp(symbolTable.types.get(index), false);
+				emit("cast", $3.place, getTypeString(symbolTable.types.get(index)), srcPlace);
+			} else {
+				System.err.println("Error! Type mismatch: " + $1.place + ", " + $3.place);
+				return YYABORT;
+			}
 		}
 		if (symbolTable.arrays.get(index)) {
 			System.err.println("Error! \"" + lexIdentifier + "\" is an array, it can not be used without index.");
@@ -802,11 +817,11 @@ other_statement:
 		}
 		$$ = new EVal();
 		((EVal)$$).place = symbolTable.names.get(index);
-		((EVal)$$).type = $3.type;
-		if($3.type != EVal.TYPE_CODE_BOOLEAN) {
+		((EVal)$$).type = symbolTable.types.get(index);
+		if(symbolTable.types.get(index) != EVal.TYPE_CODE_BOOLEAN) {
 			((EVal)$$).nextList = $1.nextList;
-			emit(":=", $3.place, null, $1.place);
-			switch ($3.type) {
+			emit(":=", srcPlace, null, $1.place);
+			switch (symbolTable.types.get(index)) {
 				case EVal.TYPE_CODE_INTEGER:
 					emit("iprint", null, null, $1.place);
 					break;
@@ -836,9 +851,24 @@ other_statement:
 			System.err.println("Error! \"" + $1.place + "\" is not declared.");
 			return YYABORT;
 		}
+		String srcPlace = $6.place;
 		if(symbolTable.types.get(index) != $6.type) {
-			System.err.println("Error! Type mismatch: " + $1.place + ", " + $3.place);
-			return YYABORT;
+			if((symbolTable.types.get(index) == EVal.TYPE_CODE_REAL)
+				&& ($6.type == EVal.TYPE_CODE_INTEGER
+					|| $6.type == EVal.TYPE_CODE_CHAR
+					|| $6.type == EVal.TYPE_CODE_BOOLEAN)) {
+				srcPlace = newTemp(EVal.TYPE_CODE_REAL, false);
+				emit("cast", $6.place, TYPE_STRING_REAL, srcPlace);
+			} else if((symbolTable.types.get(index) == EVal.TYPE_CODE_INTEGER
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_CHAR
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_BOOLEAN)
+				&& ($6.type == EVal.TYPE_CODE_REAL)) {
+				srcPlace = newTemp(symbolTable.types.get(index), false);
+				emit("cast", $6.place, getTypeString(symbolTable.types.get(index)), srcPlace);
+			} else {
+				System.err.println("Error! Type mismatch: " + $1.place + ", " + $6.place);
+				return YYABORT;
+			}
 		}
 		if (!symbolTable.arrays.get(index)) {
 			System.err.println("Error! \"" + lexIdentifier + "\" is not an array, it can not be used with index.");
@@ -846,7 +876,7 @@ other_statement:
 		}
 		$$ = new EVal();
 		((EVal)$$).place = symbolTable.names.get(index);
-		((EVal)$$).type = $3.type;
+		((EVal)$$).type = $1.type;
 		((EVal)$$).array = true;
 		EVal.arrayIndexOutOfBoundList.add(nextQuad() + 2);
 		EVal.arrayIndexOutOfBoundList.add(nextQuad() + 4);
@@ -855,9 +885,9 @@ other_statement:
 		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 4)); // result will be backpatched.
 		emit("<", indexStr + $1.place, "0", condStr + $1.place);
 		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
-		if($6.type != EVal.TYPE_CODE_BOOLEAN) {
-			emit("[]=", $6.place, indexStr + $1.place, $1.place);
-			switch ($6.type) {
+		if(symbolTable.types.get(index) != EVal.TYPE_CODE_BOOLEAN) {
+			emit("[]=", srcPlace, indexStr + $1.place, $1.place);
+			switch (symbolTable.types.get(index)) {
 				case EVal.TYPE_CODE_INTEGER:
 					emit("aiprint", $3.place, indexStr + $1.place, $1.place);
 					break;
