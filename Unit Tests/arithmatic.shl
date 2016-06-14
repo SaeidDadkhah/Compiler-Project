@@ -1,5 +1,5 @@
 program arithmaticTest
-	real r1 := 2.400000;
+	real r1 := 2.400000, r := 10.01;
 	real r2 := 00001.2;
 	real r3;
 	real r4;

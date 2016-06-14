@@ -189,7 +189,7 @@
 				dos.writeBytes(Quadruple.LINE_STR + (quadruples.size() + 2) + ":" + "\t\tprintf(\"Array Error: Invalid array size!\\n\");\n" +
 					"\t\t\t\tgetchar();\n\t\t\treturn -2;\n");
 
-			dos.writeBytes("}");
+			dos.writeBytes("}\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -939,10 +939,10 @@ other_statement:
 			System.err.println("Error! \"" + $1.place + "\" is not declared.");
 			return YYABORT;
 		}
-		if(symbolTable.types.get(index) != EVal.TYPE_CODE_INTEGER) {
-			System.err.println("Error! Type mismatch: " + $1.place + ", Integer");
-			return YYABORT;
-		}
+		// if(symbolTable.types.get(index) != EVal.TYPE_CODE_INTEGER) {
+		// 	System.err.println("Error! Type mismatch: " + $1.place + ", Integer");
+		// 	return YYABORT;
+		// }
 		if (symbolTable.arrays.get(index)) {
 			System.err.println("Error! \"" + lexIdentifier + "\" is an array, it can not be used in for initializer.");
 			return YYABORT;
@@ -1082,12 +1082,9 @@ expressions:
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
 		((EVal)$$).type = $1.type;
-		if(((EVal)$$).type != EVal.TYPE_CODE_BOOLEAN) {
-			((EVal)$$).nextList = $1.nextList;	
-		} else {
-			((EVal)$$).trueList = $1.trueList;
-			((EVal)$$).falseList = $1.falseList;
-		}
+		((EVal)$$).nextList = $1.nextList;
+		((EVal)$$).trueList = $1.trueList;
+		((EVal)$$).falseList = $1.falseList;
 	}
 	| bool_expressions {
 		System.out.println("Rule 26.2: " +
@@ -1095,6 +1092,7 @@ expressions:
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
+		((EVal)$$).nextList = $1.nextList;
 		((EVal)$$).trueList = $1.trueList;
 		((EVal)$$).falseList = $1.falseList;
 	}
@@ -1105,6 +1103,8 @@ expressions:
 		((EVal)$$).place = $1.place;
 		((EVal)$$).type = $1.type;
 		((EVal)$$).nextList = $1.nextList;
+		((EVal)$$).trueList = $1.trueList;
+		((EVal)$$).falseList = $1.falseList;
 	}
 	| saved_identifier {
 		System.out.println("Rule 26.4: " +
@@ -1121,15 +1121,13 @@ expressions:
 		$$ = new EVal();
 		((EVal)$$).place = symbolTable.names.get(index);
 		((EVal)$$).type = symbolTable.types.get(index);
-		if(((EVal)$$).type != EVal.TYPE_CODE_BOOLEAN) {
-			// emit(":=", String.valueOf(lexInt), null, ((EVal)$$).place);
-		} else {
-			((EVal)$$).trueList = EVal.makeList(nextQuad());
-			((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
 
-			emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
-			emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
-		}
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| saved_identifier LB_KW expressions RB_KW {
 		System.out.println("Rule 26.5: " +
@@ -1153,15 +1151,15 @@ expressions:
 		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 3)); // Result will be backpatched.
 		emit("<", indexStr + $1.place, "0", condStr + $1.place);
 		emit("check", condStr + $1.place, null, String.valueOf(nextQuad() + 1)); // Result will be backpatched.
-		if($3.type != EVal.TYPE_CODE_BOOLEAN) {
-			emit("=[]", $1.place, indexStr + $1.place, ((EVal)$$).place);
-		} else {
-			((EVal)$$).trueList = EVal.makeList(nextQuad());
-			((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
 
-			emit("checkarr", $1.place, indexStr + $1.place, String.valueOf(nextQuad() + 2)); // result will be backpatched.
-			emit("goto", null, null, String.valueOf(nextQuad() + 1)); //result will be backpatched.
-		}
+		emit("=[]", $1.place, indexStr + $1.place, ((EVal)$$).place);
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); //result will be backpatched.
 	}
 	| LP_KW expressions RP_KW {
 		System.out.println("Rule 26.6: " +
@@ -1181,6 +1179,8 @@ constant_expressions:
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
 		((EVal)$$).type = $1.type;
+		((EVal)$$).trueList = $1.trueList;
+		((EVal)$$).falseList = $1.falseList;
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_real {
@@ -1189,6 +1189,8 @@ constant_expressions:
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
 		((EVal)$$).type = $1.type;
+		((EVal)$$).trueList = $1.trueList;
+		((EVal)$$).falseList = $1.falseList;
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_char {
@@ -1197,6 +1199,8 @@ constant_expressions:
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
 		((EVal)$$).type = $1.type;
+		((EVal)$$).trueList = $1.trueList;
+		((EVal)$$).falseList = $1.falseList;
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_boolean {
@@ -1207,6 +1211,7 @@ constant_expressions:
 		((EVal)$$).type = $1.type;
 		((EVal)$$).trueList = $1.trueList;
 		((EVal)$$).falseList = $1.falseList;
+		((EVal)$$).nextList = $1.nextList;
 	}	
 
 bool_expressions:
@@ -1391,6 +1396,13 @@ arithmatic_expressions:
 			System.err.println("Error! Invalid type for \"+\" operation.");
 			return YYABORT;
 		}
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 	| expressions SUB_KW expressions {
 		System.out.println("Rule 29.2: " +
@@ -1422,6 +1434,13 @@ arithmatic_expressions:
 			System.err.println("Error! Invalid type for \"-\" operation.");
 			return YYABORT;
 		}
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 	| expressions MUL_KW expressions {
 		System.out.println("Rule 29.3: " +
@@ -1453,6 +1472,13 @@ arithmatic_expressions:
 			System.err.println("Error! Invalid type for \"*\" operation.");
 			return YYABORT;
 		}
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 	| expressions DIV_KW expressions {
 		System.out.println("Rule 29.4: " +
@@ -1484,26 +1510,79 @@ arithmatic_expressions:
 			System.err.println("Error! Invalid type for \"/\" operation.");
 			return YYABORT;
 		}
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 	| expressions MOD_KW expressions {
 		System.out.println("Rule 29.5: " +
 			"arithmatic_expressions: expressions MOD_KW expressions");
-		if($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER){
+		if(($1.type == EVal.TYPE_CODE_INTEGER
+				|| $1.type == EVal.TYPE_CODE_CHAR
+				|| $1.type == EVal.TYPE_CODE_BOOLEAN)
+			&& ($3.type == EVal.TYPE_CODE_INTEGER
+				|| $3.type == EVal.TYPE_CODE_CHAR
+				|| $3.type == EVal.TYPE_CODE_BOOLEAN)) {
 			$$ = new EVal();
-			((EVal)$$).place = newTemp($1.type, false);
-			((EVal)$$).type = $1.type;
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_INTEGER, false);
+			((EVal)$$).type = EVal.TYPE_CODE_INTEGER;
 			emit("%", $1.place, $3.place, ((EVal)$$).place);
+		} else if(($1.type == EVal.TYPE_CODE_INTEGER
+				|| $1.type == EVal.TYPE_CODE_CHAR
+				|| $1.type == EVal.TYPE_CODE_BOOLEAN)
+			&& $3.type == EVal.TYPE_CODE_REAL) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_INTEGER;
+			String tmp = newTemp(EVal.TYPE_CODE_INTEGER, false);
+			emit("cast", $3.place, TYPE_STRING_INTEGER, tmp);
+			emit("%", $1.place, tmp, ((EVal)$$).place);
+		} else if($1.type == EVal.TYPE_CODE_REAL
+			&& ($3.type == EVal.TYPE_CODE_INTEGER
+				|| $3.type == EVal.TYPE_CODE_CHAR
+				|| $3.type == EVal.TYPE_CODE_BOOLEAN)) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_INTEGER;
+			String tmp = newTemp(EVal.TYPE_CODE_INTEGER, false);
+			emit("cast", $1.place, TYPE_STRING_INTEGER, tmp);
+			emit("%", tmp, $3.place, ((EVal)$$).place);
+		} else {
+			System.err.println("Error! Invalid type for \"%\" operation.");
+			return YYABORT;
 		}
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 	| SUB_KW expressions %prec usub {
 		System.out.println("Rule 29.6: " +
 			"arithmatic_expressions: SUB_KW expressions");
-		if($2.type == EVal.TYPE_CODE_INTEGER || $2.type == EVal.TYPE_CODE_REAL){
+		// Type cheking will not be done for this operation.
+		// if($2.type == EVal.TYPE_CODE_INTEGER || $2.type == EVal.TYPE_CODE_REAL){
 			$$ = new EVal();
 			((EVal)$$).place = newTemp($2.type, false);
 			((EVal)$$).type = $2.type;
 			emit("usub", $2.place, null, ((EVal)$$).place);
-		}
+		// } else {
+		// 	System.err.println("Error! Invalid type for unary \"-\" operation.");
+		// 	return YYABORT;
+		// }
+
+		((EVal)$$).trueList = EVal.makeList(nextQuad());
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
+
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 
 saved_identifier:
@@ -1521,9 +1600,14 @@ saved_integer:
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_INTEGER, false);
 		((EVal)$$).type = EVal.TYPE_CODE_INTEGER;
-		((EVal)$$).nextList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
 
 		emit(":=", String.valueOf(lexInt), null, ((EVal)$$).place);
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
+
 	}
 
 saved_real:
@@ -1533,9 +1617,13 @@ saved_real:
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
 		((EVal)$$).type = EVal.TYPE_CODE_REAL;
-		((EVal)$$).nextList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
 
 		emit(":=", String.valueOf(lexReal), null, ((EVal)$$).place);
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 
 saved_char:
@@ -1545,9 +1633,13 @@ saved_char:
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_CHAR, false);
 		((EVal)$$).type = EVal.TYPE_CODE_CHAR;
-		((EVal)$$).nextList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
+		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
 
 		emit(":=", "'" + String.valueOf(lexChar) + "'", null, ((EVal)$$).place);
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 
 saved_boolean:
@@ -1559,13 +1651,14 @@ saved_boolean:
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
 		((EVal)$$).trueList = EVal.makeList(nextQuad() + 1);
 		((EVal)$$).falseList = EVal.makeList(nextQuad() + 2);
+		((EVal)$$).nextList = EVal.merge(((EVal)$$).trueList, ((EVal)$$).falseList);
 
 		if(lexBoolean)
 			emit(":=", "1", null, ((EVal)$$).place);
 		else
 			emit(":=", "0", null, ((EVal)$$).place);
-		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result will be backpatched.
-		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
+		emit("check", ((EVal)$$).place, null, String.valueOf(nextQuad() + 2)); // result may be backpatched.
+		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result may be backpatched.
 	}
 
 M:
@@ -1654,7 +1747,6 @@ class EVal {
  * |____________________________________|___________|___________|_______|_________|
  * |               goto L               |    goto   |           |       |    L    |
  * |       if BOOLEAN then goto L       |   check   |  BOOLEAN  |       |    L    |
- * |    if BOOLEAN[INDEX] then goto L   |  checkarr |  BOOLEAN  | INDEX |    L    |
  * |             E = E1 < E2            |     <     |     E1    |   E2  |    E    |
  * |            E = E1 <= E2            |     <=    |     E1    |   E2  |    E    |
  * |             E = E1 > E2            |     >     |     E1    |   E2  |    E    |
@@ -1706,13 +1798,10 @@ class Quadruple {
 				return operation + " " + LINE_STR + result + ";";
 			case "check":
 				return "if (" + arg0 + ") goto " + LINE_STR + result + ";";
-			case "checkarr":
-				return "if (" + arg0 + "[" + arg1 + "]) goto " + LINE_STR + result + ";";
 			case "<":
 			case "<=":
 			case ">":
 			case ">=":
-			case "<>":
 			case "+":
 			case "-":
 			case "*":
@@ -1721,6 +1810,8 @@ class Quadruple {
 				return result + " = " + arg0 + " " + operation + " " + arg1 + ";";
 			case "=":
 				return result + " = " + arg0 + " " + "==" + " " + arg1 + ";";
+			case "<>":
+				return result + " != " + arg0 + " " + "==" + " " + arg1 + ";";
 			case "usub":
 				return result + " = -" + arg0 + ";";
 			case ":=":

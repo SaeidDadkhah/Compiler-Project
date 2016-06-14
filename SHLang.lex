@@ -63,9 +63,9 @@ RETURN_KW = (return)
 EXIT_KW = (exit)
 WHEN_KW = (when)
 
-AND_THEN_KW = (and then)
+AND_THEN_KW = (and\sthen)
 AND_KW = (and)
-OR_ELSE_KW = (or else)
+OR_ELSE_KW = (or\selse)
 OR_KW = (or)
 NOT_KW = (not)
 
@@ -100,7 +100,7 @@ MOD_KW = [%]
 
 BOOLEAN_CONSTANT = (true) | (false)
 CHAR_CONSTANT = {SINGLE_QUOTE_KW} ({LETTER} | {DIGIT}) {SINGLE_QUOTE_KW}
-REAL_CONSTANT = {DIGIT}+ {DOT_KW} {DIGIT}*
+REAL_CONSTANT = {DIGIT}+ {DOT_KW} {DIGIT}+
 INTEGER_CONSTANT = {DIGIT}+
 IDENTIFIER ={LETTER}({LETTER}|{DIGIT})*
 
