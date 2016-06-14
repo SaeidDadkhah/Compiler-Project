@@ -1,0 +1,39 @@
+program castTest
+	real r1 := 1.1;
+	real r2 := 2.2;
+	real r3;
+	int i1 := 1;
+	int i2 := 2;
+	int i3;
+	
+main {
+	
+	r3 := r2 + i2;
+	r3 := i2 + r2;
+	r3 := r2 - i2;
+	r3 := i2 - r2;
+	r3 := r2 * i2;
+	r3 := i2 * r2;
+	r3 := r2 / i2;
+	r3 := i2 / r2;
+	
+	i3 := r2 + i2;
+	i3 := i2 + r2;
+	i3 := r2 - i2;
+	i3 := i2 - r2;
+	i3 := r2 * i2;
+	i3 := i2 * r2;
+	i3 := r2 / i2;
+	i3 := i2 / r2;
+
+	r3 := i2 + i1;
+	r3 := i1 + i2;
+	r3 := i2 - i1;
+	r3 := i1 - i2;
+	r3 := i2 * i1;
+	r3 := i1 * i2;
+	r3 := i2 / i1;
+	r3 := i1 / i2;
+	r3 := i2 % i1;
+	r3 := i1 % i2;
+}
