@@ -478,7 +478,7 @@ class YYParser
 				if(symbolTable.lookUp(sizeStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place) == SymbolTable.NOT_IN_SYMBOL_TABLE) {
 					symbolTable.addToSymbolTable(((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place, ((EVal)(yystack.valueAt (2-(1)))).type, false);
 					if(((EVal)(yystack.valueAt (2-(2)))).initializersList.get(i) != null && ((EVal)(yystack.valueAt (2-(2)))).initializersList.get(i).size() == 1) {
-						if(((EVal)(yystack.valueAt (2-(1)))).type != EVal.TYPE_CODE_BOOLEAN) {
+						//if($1.type != EVal.TYPE_CODE_BOOLEAN) {
 							emit(":=", ((EVal)(yystack.valueAt (2-(2)))).initializersList.get(i).get(0).place, null, ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
 							switch (((EVal)(yystack.valueAt (2-(1)))).type) {
 								case EVal.TYPE_CODE_INTEGER:
@@ -491,14 +491,14 @@ class YYParser
 									emit("cprint", null, null, ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
 									break;
 							}
-						} else {
+						//} else {
 							// backpatch($2.initializersList.get(i).get(0).falseList, nextQuad());
 							// backpatch($2.initializersList.get(i).get(0).trueList, nextQuad() + 2);
-							emit(":=", "0", null, ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
-							emit("goto", null, null, String.valueOf(nextQuad() + 2));
-							emit(":=", "1", null, ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
-							emit("bprint", null, null, ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
-						}
+						//	emit(":=", "0", null, $2.declareds.get(i).place);
+						//	emit("goto", null, null, String.valueOf(nextQuad() + 2));
+						//	emit(":=", "1", null, $2.declareds.get(i).place);
+						//	emit("bprint", null, null, $2.declareds.get(i).place);
+						//}
 					} else if(((EVal)(yystack.valueAt (2-(2)))).initializersList.get(i) != null) {
 						System.err.println("Error! Initializer number mismatch. (Expected: 1" + ", Number: " + ((EVal)(yystack.valueAt (2-(2)))).initializersList.get(i).size() + ")");
 						return YYABORT;
@@ -511,7 +511,7 @@ class YYParser
 							EVal.arrayIndexOutOfBoundList.add(nextQuad() + 1);
 							emit(">=", String.valueOf(j), sizeStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place, condStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
 							emit("check", condStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place, null, String.valueOf(nextQuad() + 2)); // Result will be backpatched.
-							if(((EVal)(yystack.valueAt (2-(1)))).type != EVal.TYPE_CODE_BOOLEAN) {
+							//if($1.type != EVal.TYPE_CODE_BOOLEAN) {
 								emit("[]=", ((EVal)(yystack.valueAt (2-(2)))).initializersList.get(i).get(j).place, String.valueOf(j), ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
 								emit("+", startStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place, String.valueOf(j), condStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
 								switch (((EVal)(yystack.valueAt (2-(1)))).type) {
@@ -525,14 +525,14 @@ class YYParser
 										emit("acprint", condStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place, String.valueOf(j), ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
 										break;
 								}
-							} else {
+							//} else {
 								// backpatch($2.initializersList.get(i).get(j).falseList, nextQuad());
 								// backpatch($2.initializersList.get(i).get(j).trueList, nextQuad() + 2);
-								emit("[]=", "0", String.valueOf(j), ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
-								emit("goto", null, null, String.valueOf(nextQuad() + 2));
-								emit("[]=", "1", String.valueOf(j), ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
-								emit("abprint", condStr + ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place, String.valueOf(j), ((EVal)(yystack.valueAt (2-(2)))).declareds.get(i).place);
-							}
+							//	emit("[]=", "0", String.valueOf(j), $2.declareds.get(i).place);
+							//	emit("goto", null, null, String.valueOf(nextQuad() + 2));
+							//	emit("[]=", "1", String.valueOf(j), $2.declareds.get(i).place);
+							//	emit("abprint", condStr + $2.declareds.get(i).place, String.valueOf(j), $2.declareds.get(i).place);
+							//}
 						}
 					}
 				}
