@@ -18,7 +18,7 @@
 %token <EVal> BOOLEAN_CONSTANT
 %type <EVal> saved_boolean
 
-%type <EVal> type_specifiers declarator_list declarator declarator_end dec initializer initializer_end initializer_list initializer_list_in_cb range block statement_list statement matched unmatched other_statement caseelement default expressions constant_expressions bool_expressions arithmatic_expressions
+%type <EVal> type_specifiers declarator_list declarator declarator_end dec initializer initializer_end initializer_list initializer_list_in_cb initer range block statement_list statement matched unmatched other_statement caseelement default expressions constant_expressions bool_expressions arithmatic_expressions
 %type <EVal> M N
 
 %code {
@@ -49,39 +49,59 @@
 	public String fileAddress;
 
 	public static void main(String args[]) throws IOException {
-		YYParser yyparser;
-		final Yylex lexer;
+        YYParser yyparser;
+        final Yylex lexer;
 
-		writer = new PrintStream(new File("output.txt"));
-		lexer = new Yylex(new InputStreamReader(new FileInputStream(".\\files\\Code.shl")));
+        String inputCode = ".\\files\\Code.shl";
+        String outputCode = "E:\\Dev C++\\TEMP - Programs\\compiler.c";
+        String output = "output.txt";
 
-		yyparser = new YYParser(new Lexer() {
+        if (args.length == 1) {
+            inputCode = args[0];
+            outputCode = args[0] + ".c";
+            output = args[0] + ".txt";
+        }
+        if (args.length == 2) {
+            inputCode = args[0];
+            outputCode = args[1];
+            output = args[0] + ".txt";
+        }
+        if (args.length == 3) {
+            inputCode = args[0];
+            outputCode = args[1];
+            output = args[2];
+        }
 
-			@Override
-			public int yylex() {
-				int yyl_return = -1;
-				try {
-					yyl_return = lexer.yylex();
-				} catch (IOException e) {
-					System.err.println("IO error: " + e);
-				}
-				return yyl_return;
-			}
+        writer = new PrintStream(new File(output));
+        lexer = new Yylex(new InputStreamReader(new FileInputStream(inputCode)));
 
-			@Override
-			public void yyerror(String error) {
-				System.err.println("Error! " + error);
-			}
+        yyparser = new YYParser(new Lexer() {
 
-			@Override
-			public Object getLVal() {
-				return null;
-			}
-		});
-		yyparser.fileAddress = "E:\\Dev C++\\TEMP - Programs\\compiler.c";
-		yyparser.parse();
+            @Override
+            public int yylex() {
+                int yyl_return = -1;
+                try {
+                    yyl_return = lexer.yylex();
+                } catch (IOException e) {
+                    System.err.println("IO error: " + e);
+                }
+                return yyl_return;
+            }
 
-		return;
+            @Override
+            public void yyerror(String error) {
+                System.err.println("Error! " + error);
+            }
+
+            @Override
+            public Object getLVal() {
+                return null;
+            }
+        });
+        yyparser.fileAddress = outputCode;
+        yyparser.parse();
+
+        return;
 	}
 
 	private void emit(String operation, String arg0, String arg1, String result) {
@@ -178,6 +198,7 @@
 }
 
 %left OR_KW OR_ELSE_KW
+%right ASS_KW
 %left AND_KW AND_THEN_KW
 %left EQ_KW NE_KW LE_KW LT_KW GE_KW GT_KW
 %left ADD_KW SUB_KW
@@ -324,7 +345,7 @@ type_specifiers:
 declarator_list:
 	declarator_list declarator {
 		System.out.println("Rule 5.1: " +
-			"declarator_list: declarator declarator_List");
+			"declarator_list: declarator_list declarator");
 		if($1.type == EVal.TYPE_CODE_UNKNOWN
 			|| $1.type == $2.type) {
 			$$ = new EVal();
@@ -373,7 +394,7 @@ declarator:
 	
 declarator_end:
 	dec SEMICOLON_KW {
-		System.out.println("Rule 6.1: " +
+		System.out.println("Rule 7.1: " +
 			"declarator_end: dec SEMICOLON_KW");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -381,7 +402,7 @@ declarator_end:
 		((EVal)$$).initializers = null;
 	}
 	| dec ASS_KW initializer SEMICOLON_KW {
-		System.out.println("Rule 6.2: " +
+		System.out.println("Rule 7.2: " +
 			"declarator_end: dec ASS_KW initializer SEMICOLON_KW");
 		if($1.array != $3.array) {
 			System.err.println("Error! Array mismatch: " + $1.place + " and " + $3.place + " are not the same.");
@@ -394,7 +415,7 @@ declarator_end:
 		((EVal)$$).initializers = $3.initializers;
 	}
 	| dec ASS_KW initializer_end {
-		System.out.println("Rule 6.3: " +
+		System.out.println("Rule 7.3: " +
 			"declarator_end: dec ASS_KW initializer_end");
 		if($1.array != $3.array) {
 			System.err.println("Error! Array mismatch: " + $1.place + " and " + $3.place + " are not the same.");
@@ -409,14 +430,14 @@ declarator_end:
 
 dec:
 	saved_identifier {
-		System.out.println("Rule 7.1: " +
+		System.out.println("Rule 8.1: " +
 			"dec: saved_identifier");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
 		((EVal)$$).array = false;
 	}
 	| saved_identifier LB_KW range RB_KW{
-		System.out.println("Rule 7.2: " +
+		System.out.println("Rule 8.2: " +
 			"dec: saved_identifier LB_KW range RB_KW");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -432,7 +453,7 @@ dec:
 		symbolTable.addToSymbolTable(condStr + ((EVal)$$).place, EVal.TYPE_CODE_INTEGER, false);
 	}
 	| saved_identifier LB_KW saved_integer RB_KW{
-		System.out.println("Rule 7.3: " +
+		System.out.println("Rule 8.3: " +
 			"dec: saved_identifier LB_KW saved_integer RB_KW");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -450,7 +471,7 @@ dec:
 
 range:
 	saved_identifier TWO_DOTS_KW saved_identifier {
-		System.out.println("Rule 8.1: " +
+		System.out.println("Rule 9.1: " +
 			"range: saved_identifier TWO_DOTS_KW saved_identifier");
 		int index1 = symbolTable.lookUp($1.place);
 		int index2 = symbolTable.lookUp($3.place);
@@ -491,7 +512,7 @@ range:
 		emit("check", condStr + ((EVal)$$).place, null, String.valueOf(nextQuad() + 1));
 	}
 	| saved_integer TWO_DOTS_KW saved_integer {
-		System.out.println("Rule 8.2: " +
+		System.out.println("Rule 9.2: " +
 			"range: saved_integer TWO_DOTS_KW saved_integer");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_RANGE, true);
@@ -512,7 +533,7 @@ range:
 		emit("check", condStr + ((EVal)$$).place, null, String.valueOf(nextQuad() + 1));
 	}
 	| arithmatic_expressions TWO_DOTS_KW arithmatic_expressions {
-		System.out.println("Rule 8.3: " +
+		System.out.println("Rule 9.3: " +
 			"range: arithmatic_expressions TWO_DOTS_KW arithmatic_expressions");
 		if($1.type != EVal.TYPE_CODE_INTEGER) {
 			System.err.println("Error! Type mismatch: " + $1.place + "is not integer.");
@@ -544,15 +565,15 @@ range:
 	
 initializer:
 	LCB_KW initializer_list_in_cb {
-		System.out.println("Rule 9.1: " +
-			"initializer: LCB_KW initializer_list RCB_KW");
+		System.out.println("Rule 10.1: " +
+			"initializer: LCB_KW initializer_list_in_cb");
 		$$ = new EVal();
 		((EVal)$$).type = $2.type;
 		((EVal)$$).array = $2.array;
 		((EVal)$$).initializers = $2.initializers;
 	}
 	| initializer_list {
-		System.out.println("Rule 9.2: " +
+		System.out.println("Rule 10.2: " +
 			"initializer: initializer_list");
 		$$ = new EVal();
 		((EVal)$$).type = $1.type;
@@ -561,8 +582,8 @@ initializer:
 	}
 
 initializer_list_in_cb:
-	initializer_list constant_expressions RCB_KW {
-		System.out.println("Rule 10.1: " +
+	initializer_list initer RCB_KW {
+		System.out.println("Rule 11.1: " +
 			"initializer_list_in_cb: initializer_list constant_expressions RCB_KW");
 		if($1.type == $2.type) {
 			$$ = new EVal();
@@ -575,8 +596,8 @@ initializer_list_in_cb:
 			return YYABORT;
 		}
 	}
-	| constant_expressions RCB_KW {
-		System.out.println("Rule 10.2: " +
+	| initer RCB_KW {
+		System.out.println("Rule 11.2: " +
 			"initializer_list_in_cb: constant_expressions RCB_KW");
 		$$ = new EVal();
 		((EVal)$$).type = $1.type;
@@ -585,9 +606,9 @@ initializer_list_in_cb:
 	}
 
 initializer_list:
-	initializer_list constant_expressions COMMA_KW {
-		System.out.println("Rule 10.1: " +
-			"initializer_list: constant_expressions COMMA_KW initializer_list");
+	initializer_list initer COMMA_KW {
+		System.out.println("Rule 12.1: " +
+			"initializer_list: initializer_list constant_expressions COMMA_KW");
 		if($1.type == $2.type) {
 			$$ = new EVal();
 			((EVal)$$).type = $1.type;
@@ -599,8 +620,8 @@ initializer_list:
 			return YYABORT;
 		}
 	}
-	| constant_expressions COMMA_KW {
-		System.out.println("Rule 10.2: " +
+	| initer COMMA_KW {
+		System.out.println("Rule 12.2: " +
 			"initializer_list: constant_expressions COMMA_KW");
 		$$ = new EVal();
 		((EVal)$$).type = $1.type;
@@ -609,8 +630,8 @@ initializer_list:
 	}
 
 initializer_end:
-	initializer_list constant_expressions SEMICOLON_KW {
-		System.out.println("Rule 10.2: " +
+	initializer_list initer SEMICOLON_KW {
+		System.out.println("Rule 13.1: " +
 			"initializer_end: initializer_list constant_expressions SEMICOLON_KW");
 		if($1.type == $2.type) {
 			$$ = new EVal();
@@ -623,54 +644,72 @@ initializer_end:
 			return YYABORT;
 		}
 	}
-	| constant_expressions SEMICOLON_KW {
-		System.out.println("Rule 10.2: " +
+	| initer SEMICOLON_KW {
+		System.out.println("Rule 13.2: " +
 			"initializer_end: constant_expressions SEMICOLON_KW");
 		$$ = new EVal();
 		((EVal)$$).type = $1.type;
 		((EVal)$$).array = false;
 		((EVal)$$).initializers = EVal.makeInitializersOrDeclareds($1);
 	}
+
+initer:
+	constant_expressions {
+		System.out.println("Rule 14.1: " +
+			"initer: constant_expressions");
+		$$ = new EVal();
+		((EVal)$$).place = $1.place;
+		((EVal)$$).type = $1.type;
+		((EVal)$$).nextList = $1.nextList;
+	}
+	| SUB_KW constant_expressions {
+		System.out.println("Rule 14.2: " +
+			"initer: SUB_KW constant_expressions");
+		$$ = new EVal();
+		((EVal)$$).place = newTemp($2.type, false);
+		((EVal)$$).type = $2.type;
+		emit("usub", $2.place, null, ((EVal)$$).place);
+	}
 	
 procedure_list:
 	procedure {
-		System.out.println("Rule 11.1: " +
+		System.out.println("Rule 14.1: " +
 			"procedure_list: procedure");
 	}
 	| procedure_list procedure {
-		System.out.println("Rule 11.2: " +
+		System.out.println("Rule 14.2: " +
 			"procedure_list: procedure_list procedure");
 	}
 
 procedure:
 	PROCEDURE_KW saved_identifier parameters LCB_KW declarations_list block RCB_KW {
-		System.out.println("Rule 12.1: " +
+		System.out.println("Rule 15.1: " +
 			"procedure: PROCEDURE_KW saved_identifier parameters LCB_KW declarations_list block RCB_KW");
 	}
 	| PROCEDURE_KW saved_identifier parameters LCB_KW block RCB_KW {
-		System.out.println("Rule 12.2: " +
+		System.out.println("Rule 15.2: " +
 			"procedure: PROCEDURE_KW saved_identifier parameters LCB_KW block RCB_KW");
 	}
 
 parameters:
 	LP_KW declarations_list RP_KW {
-		System.out.println("Rule 13: " +
+		System.out.println("Rule 16.1: " +
 			"parameters: LP_KW declarations_list RP_KW");
 	}
 	| LP_KW RP_KW {
-		System.out.println("Rule 13: " +
+		System.out.println("Rule 16.2: " +
 			"parameters: LP_KW RP_KW");
 	}
 
 block:
 	LCB_KW statement_list RCB_KW {
-		System.out.println("Rule 14.1: " +
-			"block: LCB_KW statement_list RCB_KW ");
+		System.out.println("Rule 17.1: " +
+			"block: LCB_KW statement_list RCB_KW");
 		$$ = new EVal();
 		((EVal)$$).nextList = $2.nextList;
 	}
 	| LCB_KW RCB_KW {
-		System.out.println("Rule 14.2: " +
+		System.out.println("Rule 17.2: " +
 			"block: LCB_KW RCB_KW ");
 		$$ = new EVal();
 		((EVal)$$).nextList = EVal.makeList(nextQuad());
@@ -679,20 +718,20 @@ block:
 
 statement_list:
 	SEMICOLON_KW M {
-		System.out.println("Rule 15.1: " +
-			"statement_list: statement SEMICOLON_KW");
+		System.out.println("Rule 18.1: " +
+			"statement_list: SEMICOLON_KW M");
 		$$ = new EVal();
 		((EVal)$$).nextList = EVal.makeList($2.quad);
 	}
 	| statement SEMICOLON_KW M {
-		System.out.println("Rule 15.2: " +
-			"statement_list: statement SEMICOLON_KW");
+		System.out.println("Rule 18.2: " +
+			"statement_list: statement SEMICOLON_KW M");
 		$$ = new EVal();
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| statement_list M statement SEMICOLON_KW {
-		System.out.println("Rule 15.3: " +
-			"statement_list: statement_list statement SEMICOLON_KW");
+		System.out.println("Rule 18.3: " +
+			"statement_list: statement_list M statement SEMICOLON_KW");
 		$$ = new EVal();
 		((EVal)$$).nextList = $3.nextList;
 		backpatch($1.nextList, $2.quad);
@@ -700,18 +739,18 @@ statement_list:
 
 statement: 
 	matched{
-		System.out.println("Rule 26.1: " +
+		System.out.println("Rule 19.1: " +
 			"statement: matched");
 	}
 	| unmatched{
-		System.out.println("Rule 26.2: " +
+		System.out.println("Rule 19.2: " +
 			"statement: unmatched");
 	}
 	
 matched: 
 	IF_KW bool_expressions THEN_KW M matched N ELSE_KW M matched {
-		System.out.println("Rule 24.1: " +
-			"matched: IF_KW bool_expressions THEN_KW matched ELSE_KW matched");
+		System.out.println("Rule 20.1: " +
+			"matched: IF_KW bool_expressions THEN_KW M matched N ELSE_KW M matched");
 		$$ = new EVal();
 		backpatch($2.trueList, $4.quad);
 		backpatch($2.falseList, $8.quad);
@@ -719,7 +758,7 @@ matched:
 		((EVal)$$).nextList = EVal.merge(((EVal)$$).nextList, $9.nextList);
 	}
 	| other_statement {
-		System.out.println("Rule 24.2: " +
+		System.out.println("Rule 20.2: " +
 			"matched: other_statement");
 		$$ = new EVal();
 		((EVal)$$).nextList = $1.nextList;
@@ -727,8 +766,8 @@ matched:
 	
 unmatched: 
 	 IF_KW bool_expressions THEN_KW M matched N ELSE_KW M unmatched {
-		System.out.println("Rule 25.1: " +
-			"unmatched: IF_KW bool_expressions THEN_KW matched ELSE_KW unmatched");
+		System.out.println("Rule 21.1: " +
+			"unmatched: IF_KW bool_expressions THEN_KW M matched N ELSE_KW M unmatched");
 		$$ = new EVal();
 		backpatch($2.trueList, $4.quad);
 		backpatch($2.falseList, $8.quad);
@@ -736,8 +775,8 @@ unmatched:
 		((EVal)$$).nextList = EVal.merge(((EVal)$$).nextList, $9.nextList);
 	}
 	| IF_KW bool_expressions THEN_KW M statement {
-		System.out.println("Rule 25.2: " +
-			"unmatched: IF_KW bool_expressions THEN_KW statement");
+		System.out.println("Rule 21.2: " +
+			"unmatched: IF_KW bool_expressions THEN_KW M statement");
 		$$ = new EVal();
 		backpatch($2.trueList, $4.quad);
 		((EVal)$$).nextList = EVal.merge($2.falseList, $5.nextList);
@@ -746,7 +785,7 @@ unmatched:
 
 other_statement:
 	saved_identifier ASS_KW expressions {
-		System.out.println("Rule 16.1: " +
+		System.out.println("Rule 22.1: " +
 			"other_statement: saved_identifier ASS_KW expressions");
 		int index = symbolTable.lookUp($1.place);
 		if (index == SymbolTable.NOT_IN_SYMBOL_TABLE) {
@@ -790,8 +829,8 @@ other_statement:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| saved_identifier LB_KW expressions RB_KW ASS_KW expressions {
-		System.out.println("Rule 16.1: " +
-			"other_statement: saved_identifier ASS_KW expressions");
+		System.out.println("Rule 22.2: " +
+			"other_statement: saved_identifier LB_KW expressions RB_KW ASS_KW expressions");
 		int index = symbolTable.lookUp($1.place);
 		if (index == SymbolTable.NOT_IN_SYMBOL_TABLE) {
 			System.err.println("Error! \"" + $1.place + "\" is not declared.");
@@ -842,8 +881,8 @@ other_statement:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| DO_KW M statement WHILE_KW M bool_expressions {
-		System.out.println("Rule 16.4: " +
-			"other_statement: DO_KW statement WHILE_KW bool_expressions");
+		System.out.println("Rule 22.3: " +
+			"other_statement: DO_KW M statement WHILE_KW M bool_expressions");
 		$$ = new EVal();
 		((EVal)$$).nextList = $6.falseList;
 
@@ -851,7 +890,7 @@ other_statement:
 		backpatch($6.trueList, $2.quad);
 	}
 	| FOR_KW saved_identifier IN_KW range N REPEAT_KW M block {
-		System.out.println("Rule 16.5: " +
+		System.out.println("Rule 22.4: " +
 			"other_statement: FOR_KW saved_identifier IN_KW range N REPEAT_KW M block");
 		int index = symbolTable.lookUp($2.place);
 		if (index == SymbolTable.NOT_IN_SYMBOL_TABLE) {
@@ -883,8 +922,8 @@ other_statement:
 		((EVal)$$).nextList = EVal.makeList(nextQuad() - 3);
 	}
 	| SWITCH_KW expressions N caseelement default END_KW {
-		System.out.println("Rule 16.6.1: " +
-			"other_statement: SWITCH_KW expressions caseelement default END_KW");
+		System.out.println("Rule 22.5.1: " +
+			"other_statement: SWITCH_KW expressions N caseelement default END_KW");
 		if($3.type != EVal.TYPE_CODE_INTEGER) {
 			System.err.println("Error! Switch expression type mismatch. (\"" + $3.place + "\" is not integer.)");
 			return YYABORT;
@@ -908,8 +947,8 @@ other_statement:
 		emit("goto", null, null, String.valueOf($5.quad)); // result will not be backpatched.
 	}
 	| SWITCH_KW expressions N caseelement END_KW {
-		System.out.println("Rule 16.6.2: " +
-			"other_statement: SWITCH_KW expressions caseelement END_KW");
+		System.out.println("Rule 22.5.2: " +
+			"other_statement: SWITCH_KW expressions N caseelement END_KW");
 		if($3.type != EVal.TYPE_CODE_INTEGER) {
 			System.err.println("Error! Switch expression type mismatch. (\"" + $3.place + "\" is not integer.)");
 			return YYABORT;
@@ -934,36 +973,36 @@ other_statement:
 		emit("goto", null, null, String.valueOf(nextQuad())); // result will be backpatched.
 	}
 	| saved_identifier LP_KW arguments RP_KW {
-		System.out.println("Rule 16.7.1: " +
+		System.out.println("Rule 22.6.1: " +
 			"other_statement: saved_identifier LP_KW arguments RP_KW");
 	}
 	| saved_identifier LP_KW RP_KW {
-		System.out.println("Rule 16.7.2: " +
+		System.out.println("Rule 22.6.2: " +
 			"other_statement: saved_identifier LP_KW RP_KW");
 	}
 	| RETURN_KW expressions {
-		System.out.println("Rule 16.8: " +
+		System.out.println("Rule 22.7: " +
 			"other_statement: RETURN_KW expressions");
 	}
 	| EXIT_KW WHEN_KW LP_KW bool_expressions RP_KW {
-		System.out.println("Rule 16.9: " +
+		System.out.println("Rule 22.8: " +
 			"other_statement: EXIT_KW WHEN_KW LP_KW bool_expressions RP_KW");
 	}
 	| block {
-		System.out.println("Rule 16.10: " +
+		System.out.println("Rule 22.9: " +
 			"other_statement: block");
 	}
 
 arguments:
 	declarator_list {
-		System.out.println("Rule 17.1: " +
+		System.out.println("Rule 23: " +
 			"arguments: declarator_list");
 	}
 
 caseelement:
-	CASE_KW M saved_integer N COLON_KW M block SEMICOLON_KW { ///////////////////// TODO \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-		System.out.println("Rule 18.1: " +
-			"caseelement: CASE_KW saved_integer COLON_KW block SEMICOLON_KW");
+	CASE_KW M saved_integer N COLON_KW M block SEMICOLON_KW {
+		System.out.println("Rule 24.1: " +
+			"caseelement: CASE_KW M saved_integer N COLON_KW M block SEMICOLON_KW");
 		$$ = new EVal();
 		((EVal)$$).initList = EVal.makeList($2.quad); // Starting point of saving saved_integer is stored in initList;
 		((EVal)$$).declareds = EVal.makeInitializersOrDeclareds($3); // saved_integer value is stored in declareds.
@@ -972,8 +1011,8 @@ caseelement:
 		((EVal)$$).nextList = $7.nextList;
 	}
 	| caseelement CASE_KW M saved_integer N COLON_KW M block SEMICOLON_KW {
-		System.out.println("Rule 18.2: " +
-			"caseelement: caseelement CASE_KW saved_integer COLON_KW block SEMICOLON_KW");
+		System.out.println("Rule 24.2: " +
+			"caseelement: caseelement CASE_KW M saved_integer N COLON_KW M block SEMICOLON_KW");
 		$$ = new EVal();
 		((EVal)$$).initList = $1.initList;
 		((EVal)$$).initList.add($3.quad);
@@ -987,8 +1026,8 @@ caseelement:
 
 default:
 	DEFAULT_KW COLON_KW M block N SEMICOLON_KW {
-		System.out.println("Rule 19: " +
-			"default: DEFAULT_KW COLON_KW block SEMICOLON_KW");
+		System.out.println("Rule 25: " +
+			"default: DEFAULT_KW COLON_KW M block N SEMICOLON_KW");
 		$$ = new EVal();
 		((EVal)$$).quad = $3.quad;
 		((EVal)$$).nextList = $5.nextList;
@@ -996,7 +1035,7 @@ default:
 
 expressions:
 	constant_expressions {
-		System.out.println("Rule 20.1: " +
+		System.out.println("Rule 26.1: " +
 			"expressions: constant_expressions");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1009,7 +1048,7 @@ expressions:
 		}
 	}
 	| bool_expressions {
-		System.out.println("Rule 20.2: " +
+		System.out.println("Rule 26.2: " +
 			"expressions: bool_expressions");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1018,7 +1057,7 @@ expressions:
 		((EVal)$$).falseList = $1.falseList;
 	}
 	| arithmatic_expressions {
-		System.out.println("Rule 20.3: " +
+		System.out.println("Rule 26.3: " +
 			"expressions: arithmatic_expressions");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1026,7 +1065,7 @@ expressions:
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_identifier {
-		System.out.println("Rule 20.4: " +
+		System.out.println("Rule 26.4: " +
 			"expressions: saved_identifier");
 		int index = symbolTable.lookUp($1.place);
 		if (index == SymbolTable.NOT_IN_SYMBOL_TABLE) {
@@ -1051,7 +1090,7 @@ expressions:
 		}
 	}
 	| saved_identifier LB_KW expressions RB_KW {
-		System.out.println("Rule 20.4: " +
+		System.out.println("Rule 26.5: " +
 			"expressions: saved_identifier LB_KW arithmatic_expressions RB_KW");
 		int index = symbolTable.lookUp($1.place);
 		if (index == SymbolTable.NOT_IN_SYMBOL_TABLE) {
@@ -1083,7 +1122,7 @@ expressions:
 		}
 	}
 	| LP_KW expressions RP_KW {
-		System.out.println("Rule 20.5: " +
+		System.out.println("Rule 26.6: " +
 			"expressions: LP_KW expressions RP_KW");
 		$$ = new EVal();
 		((EVal)$$).place = $2.place;
@@ -1095,7 +1134,7 @@ expressions:
 
 constant_expressions:
 	saved_integer {
-		System.out.println("Rule 21.1: " +
+		System.out.println("Rule 27.1: " +
 			"constant_expressions: saved_integer");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1103,7 +1142,7 @@ constant_expressions:
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_real {
-		System.out.println("Rule 21.2: " +
+		System.out.println("Rule 27.2: " +
 			"constant_expressions: saved_real");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1111,7 +1150,7 @@ constant_expressions:
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_char {
-		System.out.println("Rule 21.3: " +
+		System.out.println("Rule 27.3: " +
 			"constant_expressions: saved_char");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1119,7 +1158,7 @@ constant_expressions:
 		((EVal)$$).nextList = $1.nextList;
 	}
 	| saved_boolean {
-		System.out.println("Rule 21.4: " +
+		System.out.println("Rule 27.4: " +
 			"constant_expressions: saved_boolean");
 		$$ = new EVal();
 		((EVal)$$).place = $1.place;
@@ -1130,7 +1169,7 @@ constant_expressions:
 
 bool_expressions:
 	expressions LT_KW expressions {
-		System.out.println("Rule 22.1: " +
+		System.out.println("Rule 28.1: " +
 			"bool_expressions: expressions LT_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1143,7 +1182,7 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| expressions LE_KW expressions {
-		System.out.println("Rule 22.2: " +
+		System.out.println("Rule 28.2: " +
 			"bool_expressions: expressions LE_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1156,7 +1195,7 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| expressions GT_KW expressions {
-		System.out.println("Rule 22.3: " +
+		System.out.println("Rule 28.3: " +
 			"bool_expressions: expressions GT_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1169,7 +1208,7 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| expressions GE_KW expressions {
-		System.out.println("Rule 22.4: " +
+		System.out.println("Rule 28.4: " +
 			"bool_expressions: expressions GE_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1182,7 +1221,7 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| expressions EQ_KW expressions {
-		System.out.println("Rule 22.5: " +
+		System.out.println("Rule 28.5: " +
 			"bool_expressions: expressions EQ_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1195,7 +1234,7 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| expressions NE_KW expressions {
-		System.out.println("Rule 22.6: " +
+		System.out.println("Rule 28.6: " +
 			"bool_expressions: expressions NE_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1208,8 +1247,8 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
 	}
 	| expressions AND_KW M expressions {
-		System.out.println("Rule 22.7: " +
-			"bool_expressions: expressions AND_KW expressions");
+		System.out.println("Rule 28.7: " +
+			"bool_expressions: expressions AND_KW M expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
@@ -1218,8 +1257,8 @@ bool_expressions:
 		((EVal)$$).falseList = EVal.merge($1.falseList, $4.falseList);
 	}
 	| expressions OR_KW M expressions {
-		System.out.println("Rule 22.8: " +
-			"bool_expressions: expressions OR_KW expressions");
+		System.out.println("Rule 28.8: " +
+			"bool_expressions: expressions OR_KW M expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
@@ -1228,8 +1267,8 @@ bool_expressions:
 		((EVal)$$).falseList = $4.falseList;
 	}
 	| expressions AND_THEN_KW M expressions {
-		System.out.println("Rule 22.9: " +
-			"bool_expressions: expressions AND_THEN_KW expressions");
+		System.out.println("Rule 28.9: " +
+			"bool_expressions: expressions AND_THEN_KW M expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
@@ -1249,8 +1288,8 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1));// result will be backpatched
 	}
 	| expressions OR_ELSE_KW M expressions {
-		System.out.println("Rule 22.10: " +
-			"bool_expressions: expressions OR_ELSE_KW expressions");
+		System.out.println("Rule 28.10: " +
+			"bool_expressions: expressions OR_ELSE_KW M expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
@@ -1270,8 +1309,8 @@ bool_expressions:
 		emit("goto", null, null, String.valueOf(nextQuad() + 1));
 	}
 	| NOT_KW expressions {
-		System.out.println("Rule 22.11: " +
-			"bool_expressions: expressions NOT_KW expressions");
+		System.out.println("Rule 28.11: " +
+			"bool_expressions: NOT_KW expressions");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
 		((EVal)$$).type = EVal.TYPE_CODE_BOOLEAN;
@@ -1281,7 +1320,7 @@ bool_expressions:
 
 arithmatic_expressions:
 	expressions ADD_KW expressions {
-		System.out.println("Rule 23.1: " +
+		System.out.println("Rule 29.1: " +
 			"arithmatic_expressions: expressions ADD_KW expressions");
 		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
 			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)
@@ -1293,7 +1332,7 @@ arithmatic_expressions:
 		}
 	}
 	| expressions SUB_KW expressions {
-		System.out.println("Rule 23.2: " +
+		System.out.println("Rule 29.2: " +
 			"arithmatic_expressions: expressions SUB_KW expressions");
 		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
 			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)
@@ -1305,7 +1344,7 @@ arithmatic_expressions:
 		}
 	}
 	| expressions MUL_KW expressions {
-		System.out.println("Rule 23.3: " +
+		System.out.println("Rule 29.3: " +
 			"arithmatic_expressions: expressions MUL_KW expressions");
 		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
 			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)){
@@ -1316,7 +1355,7 @@ arithmatic_expressions:
 		}
 	}
 	| expressions DIV_KW expressions {
-		System.out.println("Rule 23.3: " +
+		System.out.println("Rule 29.4: " +
 			"arithmatic_expressions: expressions DIV_KW expressions");
 		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
 			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)){
@@ -1327,7 +1366,7 @@ arithmatic_expressions:
 		}
 	}
 	| expressions MOD_KW expressions {
-		System.out.println("Rule 23.5: " +
+		System.out.println("Rule 29.5: " +
 			"arithmatic_expressions: expressions MOD_KW expressions");
 		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
 			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)){
@@ -1338,7 +1377,7 @@ arithmatic_expressions:
 		}
 	}
 	| SUB_KW expressions %prec usub {
-		System.out.println("Rule 23.6: " +
+		System.out.println("Rule 29.6: " +
 			"arithmatic_expressions: SUB_KW expressions");
 		if($2.type == EVal.TYPE_CODE_INTEGER || $2.type == EVal.TYPE_CODE_REAL){
 			$$ = new EVal();
@@ -1350,7 +1389,7 @@ arithmatic_expressions:
 
 saved_identifier:
 	IDENTIFIER {
-		System.out.println("Rule 24: " +
+		System.out.println("Rule 30: " +
 			"saved_identifier: IDENTIFIER");
 		$$ = new EVal();
 		((EVal)$$).place = lexIdentifier;
@@ -1358,7 +1397,7 @@ saved_identifier:
 
 saved_integer:
 	INTEGER_CONSTANT {
-		System.out.println("Rule 25: " +
+		System.out.println("Rule 31: " +
 			"saved_integer: INTEGER_CONSTANT");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_INTEGER, false);
@@ -1370,7 +1409,7 @@ saved_integer:
 
 saved_real:
 	REAL_CONSTANT {
-		System.out.println("Rule 25: " +
+		System.out.println("Rule 32: " +
 			"saved_real: REAL_CONSTANT");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
@@ -1382,7 +1421,7 @@ saved_real:
 
 saved_char:
 	CHAR_CONSTANT {
-		System.out.println("Rule 25: " +
+		System.out.println("Rule 33: " +
 			"saved_char: CHAR_CONSTANT");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_CHAR, false);
@@ -1394,7 +1433,7 @@ saved_char:
 
 saved_boolean:
 	BOOLEAN_CONSTANT {
-		System.out.println("Rule 25: " +
+		System.out.println("Rule 34: " +
 			"saved_boolean: BOOLEAN_CONSTANT");
 		$$ = new EVal();
 		((EVal)$$).place = newTemp(EVal.TYPE_CODE_BOOLEAN, false);
@@ -1412,12 +1451,16 @@ saved_boolean:
 
 M:
 	{
+		System.out.println("Rule 35: " +
+			"M: ");
 		$$ = new EVal();
 		((EVal)$$).quad = nextQuad();
 	}
 
 N:
 	{
+		System.out.println("Rule 36: " +
+			"N: ");
 		$$ = new EVal();
 		((EVal)$$).nextList = EVal.makeList(nextQuad());
 		emit("goto", null, null, String.valueOf(nextQuad() + 1)); // result will be backpatched.
@@ -1516,8 +1559,8 @@ class EVal {
  * |  printf("E[PLACE] = E[INDEX].val") |  acprint  |   PLACE   | INDEX |   char  |
  * |  printf("E[PLACE] = E[INDEX].val") |  abprint  |   PLACE   | INDEX | boolean |
  * | NAME = malloc(sizeOf(TYPE) * SIZE) |   malloc  |    TYPE   |  SIZE |   NAME  |
- * |            E[INDEX] = E1           |    []=    |     E1    | INDEX |    E    |
- * |            E = E1[INDEX]           |    =[]    |     E1    | INDEX |    E    |
+ * |          *(E + INDEX) = E1         |    []=    |     E1    | INDEX |    E    |
+ * |          E = *(E1 + INDEX)         |    =[]    |     E1    | INDEX |    E    |
  * |____________________________________|___________|___________|_______|_________|
  */
 class Quadruple {
@@ -1581,9 +1624,9 @@ class Quadruple {
 			case "abprint":
 				return "printf(\"%s[%d] = %s\\n\", \"" + result + "\", " + arg0 + ", " + result + "[" + arg1 + "] ? \"true\" : \"false\");";
 			case "[]=":
-				return result + "[" + arg1 + "] = " + arg0 + ";";
+				return "*(" + result + " + " + arg1 + ") = " + arg0 + ";";
 			case "=[]":
-				return result + " = " + arg0 + "[" + arg1 + "];";
+				return result + " = *(" + arg0 + " + " + arg1 + ");";
 			case "malloc":
 				return result + " = " + "malloc(sizeof(" + arg0 + ") * " + arg1+ ");";
 			default:
