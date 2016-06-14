@@ -793,7 +793,13 @@ other_statement:
 			return YYABORT;
 		}
 		String srcPlace = $3.place;
-		if(symbolTable.types.get(index) != $3.type) {
+		if((symbolTable.types.get(index) != $3.type)
+			&& !((symbolTable.types.get(index) == EVal.TYPE_CODE_INTEGER
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_CHAR
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_BOOLEAN)
+				&& ($3.type == EVal.TYPE_CODE_INTEGER
+					|| $3.type == EVal.TYPE_CODE_CHAR
+					|| $3.type == EVal.TYPE_CODE_BOOLEAN))) {
 			if((symbolTable.types.get(index) == EVal.TYPE_CODE_REAL)
 				&& ($3.type == EVal.TYPE_CODE_INTEGER
 					|| $3.type == EVal.TYPE_CODE_CHAR
@@ -852,7 +858,13 @@ other_statement:
 			return YYABORT;
 		}
 		String srcPlace = $6.place;
-		if(symbolTable.types.get(index) != $6.type) {
+		if((symbolTable.types.get(index) != $6.type)
+			&& !((symbolTable.types.get(index) == EVal.TYPE_CODE_INTEGER
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_CHAR
+					|| symbolTable.types.get(index) == EVal.TYPE_CODE_BOOLEAN)
+				&& ($6.type == EVal.TYPE_CODE_INTEGER
+					|| $6.type == EVal.TYPE_CODE_CHAR
+					|| $6.type == EVal.TYPE_CODE_BOOLEAN))) {
 			if((symbolTable.types.get(index) == EVal.TYPE_CODE_REAL)
 				&& ($6.type == EVal.TYPE_CODE_INTEGER
 					|| $6.type == EVal.TYPE_CODE_CHAR
