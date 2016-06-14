@@ -1322,54 +1322,131 @@ arithmatic_expressions:
 	expressions ADD_KW expressions {
 		System.out.println("Rule 29.1: " +
 			"arithmatic_expressions: expressions ADD_KW expressions");
-		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
-			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)
-			|| ($1.type == EVal.TYPE_CODE_CHAR && $3.type == EVal.TYPE_CODE_CHAR)){
+		if((($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+				&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN))
+			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)) {
 			$$ = new EVal();
 			((EVal)$$).place = newTemp($1.type, false);
 			((EVal)$$).type = $1.type;
 			emit("+", $1.place, $3.place, ((EVal)$$).place);
+		} else if(($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+			&& $3.type == EVal.TYPE_CODE_REAL) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $1.place, TYPE_STRING_REAL, tmp);
+			emit("+", tmp, $3.place, ((EVal)$$).place);
+		} else if($1.type == EVal.TYPE_CODE_REAL
+			&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN)) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $3.place, TYPE_STRING_REAL, tmp);
+			emit("+", $1.place, tmp, ((EVal)$$).place);
+		} else {
+			System.err.println("Error! Invalid type for \"+\" operation.");
+			return YYABORT;
 		}
 	}
 	| expressions SUB_KW expressions {
 		System.out.println("Rule 29.2: " +
 			"arithmatic_expressions: expressions SUB_KW expressions");
-		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
-			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)
-			|| ($1.type == EVal.TYPE_CODE_CHAR && $3.type == EVal.TYPE_CODE_CHAR)){
+		if((($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+				&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN))
+			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)) {
 			$$ = new EVal();
 			((EVal)$$).place = newTemp($1.type, false);
 			((EVal)$$).type = $1.type;
 			emit("-", $1.place, $3.place, ((EVal)$$).place);
+		} else if(($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+			&& $3.type == EVal.TYPE_CODE_REAL) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $1.place, TYPE_STRING_REAL, tmp);
+			emit("-", tmp, $3.place, ((EVal)$$).place);
+		} else if($1.type == EVal.TYPE_CODE_REAL
+			&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN)) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $3.place, TYPE_STRING_REAL, tmp);
+			emit("-", $1.place, tmp, ((EVal)$$).place);
+		} else {
+			System.err.println("Error! Invalid type for \"-\" operation.");
+			return YYABORT;
 		}
 	}
 	| expressions MUL_KW expressions {
 		System.out.println("Rule 29.3: " +
 			"arithmatic_expressions: expressions MUL_KW expressions");
-		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
-			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)){
+		if((($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+				&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN))
+			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)) {
 			$$ = new EVal();
 			((EVal)$$).place = newTemp($1.type, false);
 			((EVal)$$).type = $1.type;
 			emit("*", $1.place, $3.place, ((EVal)$$).place);
+		} else if(($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+			&& $3.type == EVal.TYPE_CODE_REAL) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $1.place, TYPE_STRING_REAL, tmp);
+			emit("*", tmp, $3.place, ((EVal)$$).place);
+		} else if($1.type == EVal.TYPE_CODE_REAL
+			&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN)) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $3.place, TYPE_STRING_REAL, tmp);
+			emit("*", $1.place, tmp, ((EVal)$$).place);
+		} else {
+			System.err.println("Error! Invalid type for \"*\" operation.");
+			return YYABORT;
 		}
 	}
 	| expressions DIV_KW expressions {
 		System.out.println("Rule 29.4: " +
 			"arithmatic_expressions: expressions DIV_KW expressions");
-		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
-			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)){
+		if((($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+				&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN))
+			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)) {
 			$$ = new EVal();
 			((EVal)$$).place = newTemp($1.type, false);
 			((EVal)$$).type = $1.type;
 			emit("/", $1.place, $3.place, ((EVal)$$).place);
+		} else if(($1.type == EVal.TYPE_CODE_INTEGER || $1.type == EVal.TYPE_CODE_CHAR || $1.type == EVal.TYPE_CODE_BOOLEAN)
+			&& $3.type == EVal.TYPE_CODE_REAL) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $1.place, TYPE_STRING_REAL, tmp);
+			emit("/", tmp, $3.place, ((EVal)$$).place);
+		} else if($1.type == EVal.TYPE_CODE_REAL
+			&& ($3.type == EVal.TYPE_CODE_INTEGER || $3.type == EVal.TYPE_CODE_CHAR || $3.type == EVal.TYPE_CODE_BOOLEAN)) {
+			$$ = new EVal();
+			((EVal)$$).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)$$).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", $3.place, TYPE_STRING_REAL, tmp);
+			emit("/", $1.place, tmp, ((EVal)$$).place);
+		} else {
+			System.err.println("Error! Invalid type for \"/\" operation.");
+			return YYABORT;
 		}
 	}
 	| expressions MOD_KW expressions {
 		System.out.println("Rule 29.5: " +
 			"arithmatic_expressions: expressions MOD_KW expressions");
-		if(($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER)
-			|| ($1.type == EVal.TYPE_CODE_REAL && $3.type == EVal.TYPE_CODE_REAL)){
+		if($1.type == EVal.TYPE_CODE_INTEGER && $3.type == EVal.TYPE_CODE_INTEGER){
 			$$ = new EVal();
 			((EVal)$$).place = newTemp($1.type, false);
 			((EVal)$$).type = $1.type;
@@ -1549,7 +1626,8 @@ class EVal {
  * |             E = E1 % E2            |     %     |     E1    |   E2  |    E    |
  * |               E = -E1              |    usub   |     E1    |       |    E    |
  * |               E = E1               |     :=    |     E1    |       |    E    |
- * |               TYPE E               |    init   |    TYPE   |       |    E    |
+ * |            E = (TYPE) E1           |    cast   |     E1    |  TYPE |    E    |
+ * |               TYPE E               |    init   |           |  TYPE |    E    |
  * |         printf("E = E.val")        |   iprint  |           |       |   int   |
  * |         printf("E = E.val")        |   rprint  |           |       |   real  |
  * |         printf("E = E.val")        |   cprint  |           |       |   char  |
@@ -1605,6 +1683,8 @@ class Quadruple {
 				return result + " = -" + arg0 + ";";
 			case ":=":
 				return result + " = " + arg0 + ";";
+			case "cast":
+				return result + " = (" + arg1 + ") " + arg0 + ";";
 			case "init":
 				return arg1 + " " + result + ";";
 			case "iprint":

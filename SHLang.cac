@@ -2142,13 +2142,32 @@ class YYParser
     {
 		System.out.println("Rule 29.1: " +
 			"arithmatic_expressions: expressions ADD_KW expressions");
-		if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR)){
+		if(((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+				&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN))
+			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)) {
 			yyval = new EVal();
 			((EVal)yyval).place = newTemp(((EVal)(yystack.valueAt (3-(1)))).type, false);
 			((EVal)yyval).type = ((EVal)(yystack.valueAt (3-(1)))).type;
 			emit("+", ((EVal)(yystack.valueAt (3-(1)))).place, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+			&& ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(1)))).place, TYPE_STRING_REAL, tmp);
+			emit("+", tmp, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if(((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL
+			&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN)) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(3)))).place, TYPE_STRING_REAL, tmp);
+			emit("+", ((EVal)(yystack.valueAt (3-(1)))).place, tmp, ((EVal)yyval).place);
+		} else {
+			System.err.println("Error! Invalid type for \"+\" operation.");
+			return YYABORT;
 		}
 	};
   break;
@@ -2158,17 +2177,36 @@ class YYParser
   if (yyn == 90)
     
 /* Line 351 of lalr1.java  */
-/* Line 1334 of "SHLang.yac"  */
+/* Line 1353 of "SHLang.yac"  */
     {
 		System.out.println("Rule 29.2: " +
 			"arithmatic_expressions: expressions SUB_KW expressions");
-		if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR)){
+		if(((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+				&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN))
+			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)) {
 			yyval = new EVal();
 			((EVal)yyval).place = newTemp(((EVal)(yystack.valueAt (3-(1)))).type, false);
 			((EVal)yyval).type = ((EVal)(yystack.valueAt (3-(1)))).type;
 			emit("-", ((EVal)(yystack.valueAt (3-(1)))).place, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+			&& ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(1)))).place, TYPE_STRING_REAL, tmp);
+			emit("-", tmp, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if(((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL
+			&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN)) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(3)))).place, TYPE_STRING_REAL, tmp);
+			emit("-", ((EVal)(yystack.valueAt (3-(1)))).place, tmp, ((EVal)yyval).place);
+		} else {
+			System.err.println("Error! Invalid type for \"-\" operation.");
+			return YYABORT;
 		}
 	};
   break;
@@ -2178,16 +2216,36 @@ class YYParser
   if (yyn == 91)
     
 /* Line 351 of lalr1.java  */
-/* Line 1346 of "SHLang.yac"  */
+/* Line 1384 of "SHLang.yac"  */
     {
 		System.out.println("Rule 29.3: " +
 			"arithmatic_expressions: expressions MUL_KW expressions");
-		if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)){
+		if(((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+				&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN))
+			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)) {
 			yyval = new EVal();
 			((EVal)yyval).place = newTemp(((EVal)(yystack.valueAt (3-(1)))).type, false);
 			((EVal)yyval).type = ((EVal)(yystack.valueAt (3-(1)))).type;
 			emit("*", ((EVal)(yystack.valueAt (3-(1)))).place, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+			&& ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(1)))).place, TYPE_STRING_REAL, tmp);
+			emit("*", tmp, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if(((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL
+			&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN)) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(3)))).place, TYPE_STRING_REAL, tmp);
+			emit("*", ((EVal)(yystack.valueAt (3-(1)))).place, tmp, ((EVal)yyval).place);
+		} else {
+			System.err.println("Error! Invalid type for \"*\" operation.");
+			return YYABORT;
 		}
 	};
   break;
@@ -2197,16 +2255,36 @@ class YYParser
   if (yyn == 92)
     
 /* Line 351 of lalr1.java  */
-/* Line 1357 of "SHLang.yac"  */
+/* Line 1415 of "SHLang.yac"  */
     {
 		System.out.println("Rule 29.4: " +
 			"arithmatic_expressions: expressions DIV_KW expressions");
-		if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)){
+		if(((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+				&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN))
+			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)) {
 			yyval = new EVal();
 			((EVal)yyval).place = newTemp(((EVal)(yystack.valueAt (3-(1)))).type, false);
 			((EVal)yyval).type = ((EVal)(yystack.valueAt (3-(1)))).type;
 			emit("/", ((EVal)(yystack.valueAt (3-(1)))).place, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_BOOLEAN)
+			&& ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(1)))).place, TYPE_STRING_REAL, tmp);
+			emit("/", tmp, ((EVal)(yystack.valueAt (3-(3)))).place, ((EVal)yyval).place);
+		} else if(((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL
+			&& (((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_CHAR || ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_BOOLEAN)) {
+			yyval = new EVal();
+			((EVal)yyval).place = newTemp(EVal.TYPE_CODE_REAL, false);
+			((EVal)yyval).type = EVal.TYPE_CODE_REAL;
+			String tmp = newTemp(EVal.TYPE_CODE_REAL, false);
+			emit("cast", ((EVal)(yystack.valueAt (3-(3)))).place, TYPE_STRING_REAL, tmp);
+			emit("/", ((EVal)(yystack.valueAt (3-(1)))).place, tmp, ((EVal)yyval).place);
+		} else {
+			System.err.println("Error! Invalid type for \"/\" operation.");
+			return YYABORT;
 		}
 	};
   break;
@@ -2216,12 +2294,11 @@ class YYParser
   if (yyn == 93)
     
 /* Line 351 of lalr1.java  */
-/* Line 1368 of "SHLang.yac"  */
+/* Line 1446 of "SHLang.yac"  */
     {
 		System.out.println("Rule 29.5: " +
 			"arithmatic_expressions: expressions MOD_KW expressions");
-		if((((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER)
-			|| (((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_REAL && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_REAL)){
+		if(((EVal)(yystack.valueAt (3-(1)))).type == EVal.TYPE_CODE_INTEGER && ((EVal)(yystack.valueAt (3-(3)))).type == EVal.TYPE_CODE_INTEGER){
 			yyval = new EVal();
 			((EVal)yyval).place = newTemp(((EVal)(yystack.valueAt (3-(1)))).type, false);
 			((EVal)yyval).type = ((EVal)(yystack.valueAt (3-(1)))).type;
@@ -2235,7 +2312,7 @@ class YYParser
   if (yyn == 94)
     
 /* Line 351 of lalr1.java  */
-/* Line 1379 of "SHLang.yac"  */
+/* Line 1456 of "SHLang.yac"  */
     {
 		System.out.println("Rule 29.6: " +
 			"arithmatic_expressions: SUB_KW expressions");
@@ -2253,7 +2330,7 @@ class YYParser
   if (yyn == 95)
     
 /* Line 351 of lalr1.java  */
-/* Line 1391 of "SHLang.yac"  */
+/* Line 1468 of "SHLang.yac"  */
     {
 		System.out.println("Rule 30: " +
 			"saved_identifier: IDENTIFIER");
@@ -2267,7 +2344,7 @@ class YYParser
   if (yyn == 96)
     
 /* Line 351 of lalr1.java  */
-/* Line 1399 of "SHLang.yac"  */
+/* Line 1476 of "SHLang.yac"  */
     {
 		System.out.println("Rule 31: " +
 			"saved_integer: INTEGER_CONSTANT");
@@ -2285,7 +2362,7 @@ class YYParser
   if (yyn == 97)
     
 /* Line 351 of lalr1.java  */
-/* Line 1411 of "SHLang.yac"  */
+/* Line 1488 of "SHLang.yac"  */
     {
 		System.out.println("Rule 32: " +
 			"saved_real: REAL_CONSTANT");
@@ -2303,7 +2380,7 @@ class YYParser
   if (yyn == 98)
     
 /* Line 351 of lalr1.java  */
-/* Line 1423 of "SHLang.yac"  */
+/* Line 1500 of "SHLang.yac"  */
     {
 		System.out.println("Rule 33: " +
 			"saved_char: CHAR_CONSTANT");
@@ -2321,7 +2398,7 @@ class YYParser
   if (yyn == 99)
     
 /* Line 351 of lalr1.java  */
-/* Line 1435 of "SHLang.yac"  */
+/* Line 1512 of "SHLang.yac"  */
     {
 		System.out.println("Rule 34: " +
 			"saved_boolean: BOOLEAN_CONSTANT");
@@ -2345,7 +2422,7 @@ class YYParser
   if (yyn == 100)
     
 /* Line 351 of lalr1.java  */
-/* Line 1453 of "SHLang.yac"  */
+/* Line 1530 of "SHLang.yac"  */
     {
 		System.out.println("Rule 35: " +
 			"M: ");
@@ -2359,7 +2436,7 @@ class YYParser
   if (yyn == 101)
     
 /* Line 351 of lalr1.java  */
-/* Line 1461 of "SHLang.yac"  */
+/* Line 1538 of "SHLang.yac"  */
     {
 		System.out.println("Rule 36: " +
 			"N: ");
@@ -2373,7 +2450,7 @@ class YYParser
 
 
 /* Line 351 of lalr1.java  */
-/* Line 2377 of "SHLang.cac"  */
+/* Line 2454 of "SHLang.cac"  */
 	default: break;
       }
 
@@ -3125,8 +3202,8 @@ class YYParser
      979,   983,   987,   991,   997,  1003,  1013,  1028,  1037,  1050,
     1059,  1067,  1092,  1124,  1136,  1144,  1152,  1160,  1171,  1184,
     1197,  1210,  1223,  1236,  1249,  1259,  1269,  1290,  1311,  1322,
-    1334,  1346,  1357,  1368,  1379,  1391,  1399,  1411,  1423,  1435,
-    1453,  1461
+    1353,  1384,  1415,  1446,  1456,  1468,  1476,  1488,  1500,  1512,
+    1530,  1538
   };
 
   // Report on the debug stream that the rule yyrule is going to be reduced.
@@ -3387,13 +3464,13 @@ class YYParser
 
 
 /* Line 927 of lalr1.java  */
-/* Line 3391 of "SHLang.cac"  */
+/* Line 3468 of "SHLang.cac"  */
 
 }
 
 
 /* Line 931 of lalr1.java  */
-/* Line 1469 of "SHLang.yac"  */
+/* Line 1546 of "SHLang.yac"  */
 
 // Classes
 // // EVal
@@ -3477,7 +3554,8 @@ class EVal {
  * |             E = E1 % E2            |     %     |     E1    |   E2  |    E    |
  * |               E = -E1              |    usub   |     E1    |       |    E    |
  * |               E = E1               |     :=    |     E1    |       |    E    |
- * |               TYPE E               |    init   |    TYPE   |       |    E    |
+ * |            E = (TYPE) E1           |    cast   |     E1    |  TYPE |    E    |
+ * |               TYPE E               |    init   |           |  TYPE |    E    |
  * |         printf("E = E.val")        |   iprint  |           |       |   int   |
  * |         printf("E = E.val")        |   rprint  |           |       |   real  |
  * |         printf("E = E.val")        |   cprint  |           |       |   char  |
@@ -3533,6 +3611,8 @@ class Quadruple {
 				return result + " = -" + arg0 + ";";
 			case ":=":
 				return result + " = " + arg0 + ";";
+			case "cast":
+				return result + " = (" + arg1 + ") " + arg0 + ";";
 			case "init":
 				return arg1 + " " + result + ";";
 			case "iprint":
